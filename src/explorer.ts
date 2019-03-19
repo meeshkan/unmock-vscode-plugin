@@ -17,7 +17,7 @@ export class MockExplorer implements vscode.TreeDataProvider<vscode.TreeItem> {
     }
 
     getChildren(element?: vscode.TreeItem | undefined): vscode.ProviderResult<vscode.TreeItem[]> {
-        return Promise.resolve(this.contents);
+        return this.contents;
     }
 
     private hardRefresh() {

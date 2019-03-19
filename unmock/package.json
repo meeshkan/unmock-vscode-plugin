@@ -17,7 +17,24 @@
 		"commands": [{
 			"command": "extension.helloWorld",
 			"title": "Hello World"
-		}]
+		}],
+		"viewsContainers": {
+			"activitybar": [
+				{
+					"id": "mocks-explorer",
+					"title": "Unmock Mock Explorer",
+					"icon": "./resources/unmock-logo.bmp"
+				}
+			]
+		},
+		"views": {
+			"mocks-explorer": [
+				{
+					"id": "unmock-mocks",
+					"name": "Mocks"
+				}
+			]
+		}
 	},
 	"scripts": {
 		"vscode:prepublish": "yarn run compile",

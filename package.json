@@ -10,27 +10,25 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:extension.helloWorld"
+		"onView:mocksExplorer"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
-		"commands": [{
-			"command": "extension.helloWorld",
-			"title": "Hello World"
-		}],
+		"commands": [
+		],
 		"viewsContainers": {
 			"activitybar": [
 				{
-					"id": "mocks-explorer",
+					"id": "unmock-activity-button",
 					"title": "Unmock Mock Explorer",
 					"icon": "./resources/unmock-logo.bmp"
 				}
 			]
 		},
 		"views": {
-			"mocks-explorer": [
+			"unmock-activity-button": [
 				{
-					"id": "unmock-mocks",
+					"id": "mocksExplorer",
 					"name": "Mocks"
 				}
 			]

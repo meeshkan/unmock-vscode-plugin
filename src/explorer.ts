@@ -1,7 +1,8 @@
 import * as vscode from "vscode";
 import * as fs from "fs";
 import * as path from "path";
-import * as axios from "axios";
+import axios from "axios";
+import { getAccessToken, verifyFileIsBodyJson } from "./utils";
 
 export class MockExplorer implements vscode.TreeDataProvider<MockTreeItem> {
     private _tree: MockTreeItem[] = [];
@@ -13,17 +14,31 @@ export class MockExplorer implements vscode.TreeDataProvider<MockTreeItem> {
     onDidChangeTreeData = this._onDidChangeTreeData.event;
 
     constructor() {
-        // TODO: Also add a watcher, perhaps instead of registering to events like this?
         const rootPath = vscode.workspace.rootPath;
         if (rootPath !== undefined) {
+            // Assumes mocks saved in <workspace>/<configuration unmock path (.unmock by default)>/save/
             this.mockPath = path.join(rootPath, vscode.workspace.getConfiguration("unmock").path, "save");
             this.mockRelativePattern = new vscode.RelativePattern(this.mockPath, "**/*.json");
             this.hardRefresh();
 
             this.watcher = vscode.workspace.createFileSystemWatcher("**/*.json");
-            this.watcher.onDidChange(fileUri => {
-                console.log("POST UPDATE TO CLOUD FOR " + fileUri.fsPath);
+            this.watcher.onDidChange(async fileUri => {
+                // See if the JSON is valid - otherwise don't every bother
+                const fileContents = verifyFileIsBodyJson(fileUri.fsPath);
+
+                const accessToken = await getAccessToken();
+                console.log("Access Token " + accessToken);
+                if (accessToken !== undefined) {
+                    // The following assumes the structure is <hashcode>/file.json!!
+                    const hash = path.basename(path.dirname(fileUri.fsPath));
+                    console.log("Hash - " + hash);
+                    axios.post(`https://api.unmock.io:443/mocks/${hash}`, { response: fileContents },
+                        { headers: { Authorization: `Bearer ${accessToken}`}},
+                    );
+                }
             });
+
+            // These don't add anything to the cloud, just to the view...
             this.watcher.onDidCreate(fileUri => {
                 // TODO: We can probably make this more efficient -- but do we need to?
                 // This effectively refreshes all of the tree, instead of simply adding/removing where needs...

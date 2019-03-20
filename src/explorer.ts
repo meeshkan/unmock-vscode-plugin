@@ -10,14 +10,19 @@ export class MockExplorer implements vscode.TreeDataProvider<MockTreeItem> {
 
     constructor() {
         // TODO: Also add a watcher?
-        vscode.workspace.findFiles("**/*.json").then(filepaths => {
-            filepaths.forEach(fp => this.locationOfJsons.push(fp.fsPath));
-            this._onDidChangeTreeData.fire();
-        });
+        this.hardRefresh();
     }
 
     getTreeItem(element: MockTreeItem): MockTreeItem | Thenable<MockTreeItem> {
-        return element;
+        return {
+            ...element,
+            command: element.isFile ? { // TODO: Update this to JSON editor that POSTS to cloud if token is given
+                // TODO add persistence layer for token?
+                command: 'helloWorld.console',
+                arguments: [],
+                title: "Prints hello",
+            } : void 0,
+        };
     }
 
     getChildren(element?: MockTreeItem | undefined): vscode.ProviderResult<MockTreeItem[]> {
@@ -25,6 +30,13 @@ export class MockExplorer implements vscode.TreeDataProvider<MockTreeItem> {
             return this.populateChildren(vscode.workspace.rootPath);
         }
         return this.populateChildren(element.currentPath, element);
+    }
+
+    private hardRefresh() {
+        vscode.workspace.findFiles("**/*.json").then(filepaths => {
+            filepaths.forEach(fp => this.locationOfJsons.push(fp.fsPath));
+            this._onDidChangeTreeData.fire();
+        });
     }
 
     private populateChildren(rootDir?: string, parent?: MockTreeItem) {
@@ -40,6 +52,7 @@ export class MockExplorer implements vscode.TreeDataProvider<MockTreeItem> {
             if (parent !== undefined) {
                 ti.parent = parent;
             }
+            ti.isFile = isFile;
             ti.currentPath = path.join(rootDir, label);
             return ti;
         });
@@ -61,9 +74,16 @@ export class MockExplorer implements vscode.TreeDataProvider<MockTreeItem> {
             if (this.directoryIsKnownToContainJson(fp) === false) {
                 return false;
             }
-            const fileStats = fs.statSync(fp);
-            return (fileStats.isFile() && fp.endsWith(".json")) || fileStats.isDirectory();
+            return MockExplorer.isJsonFile(fp, true);
         });
+    }
+
+    private static isJsonFile(fp?: string, directoryOK = false) {
+        if (fp === undefined) {
+            return false;
+        }
+        const fileStats = fs.statSync(fp);
+        return (fileStats.isFile() && fp.endsWith(".json")) || (directoryOK && fileStats.isDirectory());
     }
 
     private directoryIsKnownToContainJson(directory: string) {
@@ -89,4 +109,5 @@ export class MockTreeItem extends vscode.TreeItem {
     public fullPath: string | undefined;
     public currentPath: string | undefined;
     public parent: MockTreeItem | undefined;
+    public isFile: boolean = false;
 }

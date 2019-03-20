@@ -14,6 +14,24 @@
 	],
 	"main": "./out/extension.js",
 	"contributes": {
+		"configuration":[
+			{
+				"title": "Unmock Configuration",
+				"type": "object",
+				"properties": {
+					"unmock.refreshToken": {
+						"type": ["string", "null"],
+						"default": null,
+						"description": "The refresh token to get when you registered for unmock. Used for various operations with the remote unmock service."
+					},
+					"unmock.path": {
+						"type": "string",
+						"default": ".unmock",
+						"description": "Default path to look for mock files and stored credentials (relative to the workspace)."
+					}
+				}
+			}
+		],
 		"commands": [
 		],
 		"viewsContainers": {

@@ -27,7 +27,11 @@ export class MockExplorer implements vscode.TreeDataProvider<MockTreeItem> {
 
     getChildren(element?: MockTreeItem | undefined): vscode.ProviderResult<MockTreeItem[]> {
         if (element === undefined) {
-            return this.populateChildren(vscode.workspace.rootPath);
+            const rootPath = vscode.workspace.rootPath;
+            if (rootPath === undefined) {
+                return [];
+            }
+            return this.populateChildren(path.join(rootPath, vscode.workspace.getConfiguration("unmock").path, "save"));
         }
         return this.populateChildren(element.currentPath, element);
     }

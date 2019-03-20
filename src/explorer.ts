@@ -52,6 +52,7 @@ export class MockExplorer implements vscode.TreeDataProvider<MockTreeItem> {
             const isFile = fs.statSync(f).isFile();
             const ti = new MockTreeItem(label, isFile ? vscode.TreeItemCollapsibleState.None : vscode.TreeItemCollapsibleState.Expanded,
                                         f, path.join(rootDir, label), isFile);
+            ti.resourceUri = vscode.Uri.file(f);
             if (parent !== undefined) {
                 ti.parent = parent;
             }

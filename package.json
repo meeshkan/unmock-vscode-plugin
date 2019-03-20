@@ -14,13 +14,16 @@
 	],
 	"main": "./out/extension.js",
 	"contributes": {
-		"configuration":[
+		"configuration": [
 			{
 				"title": "Unmock Configuration",
 				"type": "object",
 				"properties": {
 					"unmock.refreshToken": {
-						"type": ["string", "null"],
+						"type": [
+							"string",
+							"null"
+						],
 						"default": null,
 						"description": "The refresh token to get when you registered for unmock. Used for various operations with the remote unmock service."
 					},
@@ -32,8 +35,7 @@
 				}
 			}
 		],
-		"commands": [
-		],
+		"commands": [],
 		"viewsContainers": {
 			"activitybar": [
 				{
@@ -59,11 +61,15 @@
 		"postinstall": "node ./node_modules/vscode/bin/install",
 		"test": "yarn run compile && node ./node_modules/vscode/bin/test"
 	},
+	"dependencies": {
+		"@types/ini": "^1.3.30",
+		"ini": "^1.3.5"
+	},
 	"devDependencies": {
-		"typescript": "^3.3.1",
-		"vscode": "^1.1.28",
-		"tslint": "^5.12.1",
+		"@types/mocha": "^2.2.42",
 		"@types/node": "^10.12.21",
-		"@types/mocha": "^2.2.42"
+		"tslint": "^5.12.1",
+		"typescript": "^3.3.1",
+		"vscode": "^1.1.28"
 	}
 }

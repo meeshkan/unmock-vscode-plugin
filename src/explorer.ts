@@ -1,6 +1,6 @@
-import * as vscode from 'vscode';
-import * as fs from 'fs';
-import * as path from 'path';
+import * as vscode from "vscode";
+import * as fs from "fs";
+import * as path from "path";
 
 export class MockExplorer implements vscode.TreeDataProvider<MockTreeItem> {
     // private watcher = vscode.workspace.createFileSystemWatcher("*.json");
@@ -18,7 +18,7 @@ export class MockExplorer implements vscode.TreeDataProvider<MockTreeItem> {
             ...element,
             command: element.isFile ? { // TODO: Update this to JSON editor that POSTS to cloud if token is given
                 // TODO add persistence layer for token?
-                command: 'helloWorld.console',
+                command: "helloWorld.console",
                 arguments: [],
                 title: "Prints hello",
             } : void 0,

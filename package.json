@@ -48,7 +48,7 @@
 		"views": {
 			"unmock-activity-button": [
 				{
-					"id": "mocksExplorer",
+					"id": "unmock.mocksExplorer",
 					"name": "Mock Explorer"
 				}
 			]

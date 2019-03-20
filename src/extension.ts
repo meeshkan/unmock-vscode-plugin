@@ -3,13 +3,15 @@ import * as fs from "fs";
 import * as path from "path";
 import * as ini from "ini";
 import * as os from "os";
-import { MockExplorer } from "./explorer";
+import { MockExplorer, MockTreeItem } from "./explorer";
 
 export function activate(context: vscode.ExtensionContext) {
 
 	const jsonExplorer = new MockExplorer();
-	vscode.window.registerTreeDataProvider("mocksExplorer", jsonExplorer);
-	vscode.commands.registerCommand("helloWorld.console", () => console.log("HELLO THERE"));
+	vscode.window.registerTreeDataProvider("unmock.mocksExplorer", jsonExplorer);
+	vscode.commands.registerCommand("unmock.editMock", (element: MockTreeItem) => {
+		vscode.commands.executeCommand("vscode.open", vscode.Uri.file(element.currentPath));
+	});
 
 	const config = vscode.workspace.getConfiguration("unmock");
 	let refreshToken: string | undefined = config.refreshToken;

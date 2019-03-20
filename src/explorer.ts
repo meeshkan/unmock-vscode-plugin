@@ -17,10 +17,9 @@ export class MockExplorer implements vscode.TreeDataProvider<MockTreeItem> {
         return {
             ...element,
             command: element.isFile ? { // TODO: Update this to JSON editor that POSTS to cloud if token is given
-                // TODO add persistence layer for token?
-                command: "helloWorld.console",
-                arguments: [],
-                title: "Prints hello",
+                command: "unmock.editMock",
+                arguments: [element],
+                title: "Opens mock for editing",
             } : void 0,
         };
     }
@@ -51,13 +50,11 @@ export class MockExplorer implements vscode.TreeDataProvider<MockTreeItem> {
         return files.map(f => {
             const label = MockExplorer.trimToFolderOrFileBeneath(f, rootDir);
             const isFile = fs.statSync(f).isFile();
-            const ti = new MockTreeItem(label, isFile ? vscode.TreeItemCollapsibleState.None : vscode.TreeItemCollapsibleState.Expanded);
-            ti.fullPath = f;
+            const ti = new MockTreeItem(label, isFile ? vscode.TreeItemCollapsibleState.None : vscode.TreeItemCollapsibleState.Expanded,
+                                        f, path.join(rootDir, label), isFile);
             if (parent !== undefined) {
                 ti.parent = parent;
             }
-            ti.isFile = isFile;
-            ti.currentPath = path.join(rootDir, label);
             return ti;
         });
     }
@@ -110,8 +107,10 @@ export class MockExplorer implements vscode.TreeDataProvider<MockTreeItem> {
 }
 
 export class MockTreeItem extends vscode.TreeItem {
-    public fullPath: string | undefined;
-    public currentPath: string | undefined;
     public parent: MockTreeItem | undefined;
-    public isFile: boolean = false;
+    
+    constructor (label: string, collapsibleState: vscode.TreeItemCollapsibleState,
+                 public fullPath: string, public currentPath: string, public isFile: boolean = false) {
+        super(label, collapsibleState);
+    }
 }

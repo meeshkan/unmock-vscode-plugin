@@ -10,7 +10,7 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onView:mocksExplorer"
+		"workspaceContains:**/*.json"
 	],
 	"main": "./out/extension.js",
 	"contributes": {

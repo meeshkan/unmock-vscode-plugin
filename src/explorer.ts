@@ -1,16 +1,41 @@
 import * as vscode from "vscode";
 import * as fs from "fs";
 import * as path from "path";
+import * as axios from "axios";
 
 export class MockExplorer implements vscode.TreeDataProvider<MockTreeItem> {
-    // private watcher = vscode.workspace.createFileSystemWatcher("*.json");
-    private locationOfJsons = new Array<string>();
+    private _tree: MockTreeItem[] = [];
+    private watcher: vscode.FileSystemWatcher | undefined;
+    private mockPath: string | undefined;
+    private mockRelativePattern: vscode.RelativePattern | undefined;
+    private locationOfJsons: string[] = [];
     private _onDidChangeTreeData = new vscode.EventEmitter<MockTreeItem>();
     onDidChangeTreeData = this._onDidChangeTreeData.event;
 
     constructor() {
-        // TODO: Also add a watcher?
-        this.hardRefresh();
+        // TODO: Also add a watcher, perhaps instead of registering to events like this?
+        const rootPath = vscode.workspace.rootPath;
+        if (rootPath !== undefined) {
+            this.mockPath = path.join(rootPath, vscode.workspace.getConfiguration("unmock").path, "save");
+            this.mockRelativePattern = new vscode.RelativePattern(this.mockPath, "**/*.json");
+            this.hardRefresh();
+
+            this.watcher = vscode.workspace.createFileSystemWatcher("**/*.json");
+            this.watcher.onDidChange(fileUri => {
+                console.log("POST UPDATE TO CLOUD FOR " + fileUri.fsPath);
+            });
+            this.watcher.onDidCreate(fileUri => {
+                // TODO: We can probably make this more efficient -- but do we need to?
+                // This effectively refreshes all of the tree, instead of simply adding/removing where needs...
+                this.hardRefresh();
+                this._onDidChangeTreeData.fire();
+            });
+
+            this.watcher.onDidDelete(fileUri => {
+                this.hardRefresh();
+                this._onDidChangeTreeData.fire();
+            });
+        }
     }
 
     getTreeItem(element: MockTreeItem): MockTreeItem | Thenable<MockTreeItem> {
@@ -26,18 +51,23 @@ export class MockExplorer implements vscode.TreeDataProvider<MockTreeItem> {
 
     getChildren(element?: MockTreeItem | undefined): vscode.ProviderResult<MockTreeItem[]> {
         if (element === undefined) {
-            const rootPath = vscode.workspace.rootPath;
-            if (rootPath === undefined) {
-                return [];
-            }
-            return this.populateChildren(path.join(rootPath, vscode.workspace.getConfiguration("unmock").path, "save"));
+            return this._tree;
         }
-        return this.populateChildren(element.currentPath, element);
+        const matchingCached = this._tree.find((mi) => mi === element);
+        return matchingCached && matchingCached.children.length > 0 ? matchingCached.children : this.populateChildren(element.currentPath, element);
     }
 
     private hardRefresh() {
-        vscode.workspace.findFiles("**/*.json").then(filepaths => {
+        this.locationOfJsons = [];  // Clear known jsons location
+        vscode.workspace.findFiles(this.mockRelativePattern || "**/*.json").then(filepaths => {
             filepaths.forEach(fp => this.locationOfJsons.push(fp.fsPath));
+            const rootPath = vscode.workspace.rootPath;
+            if (rootPath === undefined) {
+                this._tree = [];
+            }
+            else {
+                this._tree = this.populateChildren(this.mockPath);
+            }
             this._onDidChangeTreeData.fire();
         });
     }
@@ -47,7 +77,7 @@ export class MockExplorer implements vscode.TreeDataProvider<MockTreeItem> {
             return [];
         }
         const files = this.getJsons(rootDir);
-        return files.map(f => {
+        const children = files.map(f => {
             const label = MockExplorer.trimToFolderOrFileBeneath(f, rootDir);
             const isFile = fs.statSync(f).isFile();
             const ti = new MockTreeItem(label, isFile ? vscode.TreeItemCollapsibleState.None : vscode.TreeItemCollapsibleState.Expanded,
@@ -58,6 +88,10 @@ export class MockExplorer implements vscode.TreeDataProvider<MockTreeItem> {
             }
             return ti;
         });
+        if (parent !== undefined) {
+            parent.children = children;
+        }
+        return children;
     }
 
     private getJsons(rootDir?: string) {
@@ -109,6 +143,7 @@ export class MockExplorer implements vscode.TreeDataProvider<MockTreeItem> {
 
 export class MockTreeItem extends vscode.TreeItem {
     public parent: MockTreeItem | undefined;
+    public children: MockTreeItem[] = [];
     
     constructor (label: string, collapsibleState: vscode.TreeItemCollapsibleState,
                  public fullPath: string, public currentPath: string, public isFile: boolean = false) {

@@ -40,7 +40,7 @@
 			"activitybar": [
 				{
 					"id": "unmock-activity-button",
-					"title": "Unmock Mock Explorer",
+					"title": "Unmock",
 					"icon": "./resources/unmock-logo.bmp"
 				}
 			]
@@ -49,7 +49,7 @@
 			"unmock-activity-button": [
 				{
 					"id": "mocksExplorer",
-					"name": "Mocks"
+					"name": "Mock Explorer"
 				}
 			]
 		}

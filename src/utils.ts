@@ -15,16 +15,13 @@ export async function getAccessToken() {
     }
 }
 
-export function verifyFileIsBodyJson(filepath: string) {
+export function verifyFileHasBodyJson(filepath: string) {
     // Returns file contents if it is a valid json for a body response
     // Returns undefined otherwise
     const fileContents = fs.readFileSync(filepath, 'utf-8');
     try {
         const parsedContent = JSON.parse(fileContents);
-        if (parsedContent["unmock-hash"] !== undefined) {
-            return; // This is a headers file -- we don't **really** care about that...
-        }
-        return fileContents;
+        return parsedContent["body"];
     } catch {
         return;
     }

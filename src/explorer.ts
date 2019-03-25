@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import * as fs from "fs";
 import * as path from "path";
 import axios from "axios";
-import { getAccessToken, verifyFileIsBodyJson } from "./utils";
+import { getAccessToken, verifyFileHasBodyJson } from "./utils";
 
 const UNMOCK_METADATA_FILENAME = "metadata.unmock.yml";
 const UNMOCK_METADATA_SUFFIX = "unmock.yml";
@@ -20,8 +20,6 @@ export class MockExplorer implements vscode.TreeDataProvider<MockTreeItem> {
         this.mockRelativePattern = `**/*.{json,${UNMOCK_METADATA_SUFFIX}}`;
         const rootPath = vscode.workspace.rootPath;
         if (rootPath !== undefined) {
-            // Assumes mocks saved in <workspace>/<configuration unmock path (.unmock by default)>/save/
-            // this.mockPath = path.join(rootPath, vscode.workspace.getConfiguration("unmock").path, "save");
             this.mockPath = rootPath;
             this.mockRelativePattern = new vscode.RelativePattern(this.mockPath, `**/*.{json,${UNMOCK_METADATA_SUFFIX}}`);
             this.hardRefresh();
@@ -29,15 +27,15 @@ export class MockExplorer implements vscode.TreeDataProvider<MockTreeItem> {
             this.watcher = vscode.workspace.createFileSystemWatcher(this.mockRelativePattern);
             this.watcher.onDidChange(async fileUri => {
                 // See if the JSON is valid - otherwise don't every bother
-                const fileContents = verifyFileIsBodyJson(fileUri.fsPath);
-
+                const fileContents = verifyFileHasBodyJson(fileUri.fsPath);
+                if (fileContents === undefined) {
+                    return;
+                }
                 const accessToken = await getAccessToken();
-                console.log("Access Token " + accessToken);
                 if (accessToken !== undefined) {
                     // The following assumes the structure is <hashcode>/file.json!!
                     const hash = path.basename(path.dirname(fileUri.fsPath));
-                    console.log("Hash - " + hash);
-                    axios.post(`https://api.unmock.io:443/mocks/${hash}`, { response: fileContents },
+                    axios.post(`https://api.unmock.io:443/mocks/${hash}`, { response: JSON.stringify(fileContents) },
                         { headers: { Authorization: `Bearer ${accessToken}`}},
                     );
                 }

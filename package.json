@@ -33,11 +33,6 @@
 						"type": "string",
 						"default": ".unmock",
 						"description": "Default path to look for stored credentials (relative to the workspace ror absolute path)."
-					},
-					"unmock.mocksPath": {
-						"type": "string",
-						"default": ".unmock/save",
-						"description": "Default path to look for mock files (relative to workspace or absolute path)"
 					}
 				}
 			}

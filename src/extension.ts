@@ -7,11 +7,21 @@ import { MockExplorer, MockTreeItem } from "./explorer";
 
 export function activate(context: vscode.ExtensionContext) {
 
+	// Add the extension button
 	const jsonExplorer = new MockExplorer();
 	vscode.window.registerTreeDataProvider("unmock.mocksExplorer", jsonExplorer);
 	vscode.commands.registerCommand("unmock.editMock", (element: MockTreeItem) => {
 		vscode.commands.executeCommand("vscode.open", vscode.Uri.file(element.currentPath));
 	});
+
+	// Create the statusbar section
+	const statusBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
+	vscode.commands.registerCommand("unmock.statusbar.hide", () => statusBar.hide());
+	vscode.commands.registerCommand("unmock.statusbar.text", (text: string) => {
+		statusBar.text = `Unmock: ${text}`;
+		statusBar.show();
+	});
+	statusBar.command = "unmock.statusbar.hide";
 
 	const config = vscode.workspace.getConfiguration("unmock");
 	let refreshToken: string | undefined = config.refreshToken;

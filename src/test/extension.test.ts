@@ -4,6 +4,7 @@
 //
 
 // The module 'assert' provides assertion methods from node
+import axios from "axios";
 import * as assert from 'assert';
 
 // You can import and use all API from the 'vscode' module
@@ -18,5 +19,6 @@ suite("Extension Tests", function () {
     test("Something 1", function() {
         assert.equal(-1, [1, 2, 3].indexOf(5));
         assert.equal(-1, [1, 2, 3].indexOf(0));
+        axios.get("https://www.example.com");
     });
 });

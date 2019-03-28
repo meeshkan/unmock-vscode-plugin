@@ -12,7 +12,9 @@
 		"Other"
 	],
 	"activationEvents": [
-		"workspaceContains:**/*.json"
+		"workspaceContains:**/*.json",
+		"onLanguage:javascript",
+		"onLanguage:typescript"
 	],
 	"main": "./out/extension.js",
 	"contributes": {

@@ -4,8 +4,15 @@ import * as path from "path";
 import * as ini from "ini";
 import * as os from "os";
 import { MockExplorer, MockTreeItem } from "./explorer";
+import { JestTestFileSelector, TypescriptGotoMockProvider } from "./providers";
 
 export function activate(context: vscode.ExtensionContext) {
+	// Add the suggestion CodeLens
+	vscode.commands.registerTextEditorCommand("unmock.insertUnmockToTest",
+		(textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit, ...args: any[]) => {
+			textEditor.insertSnippet(new vscode.SnippetString("import { unmock } from \"unmock\";"), new vscode.Position(0, 0));
+	});
+	vscode.languages.registerCodeLensProvider(JestTestFileSelector, new TypescriptGotoMockProvider());
 
 	// Add the extension button
 	const jsonExplorer = new MockExplorer();

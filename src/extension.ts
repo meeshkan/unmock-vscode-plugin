@@ -4,15 +4,26 @@ import * as path from "path";
 import * as ini from "ini";
 import * as os from "os";
 import { MockExplorer, MockTreeItem } from "./explorer";
-import { JestTestFileSelector, TypescriptGotoMockProvider } from "./providers";
+import { JestTestFileSelector, TypescriptInsertUnmockCodeLens, TypeScriptInsertUnmockAction } from "./providers";
 
 export function activate(context: vscode.ExtensionContext) {
 	// Add the suggestion CodeLens
 	vscode.commands.registerTextEditorCommand("unmock.insertUnmockToTest",
 		(textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit, ...args: any[]) => {
-			textEditor.insertSnippet(new vscode.SnippetString("import { unmock } from \"unmock\";"), new vscode.Position(0, 0));
+			textEditor.insertSnippet(new vscode.SnippetString("import { unmock, kcomnu } from \"unmock\";\n"), new vscode.Position(0, 0));
+			if (args.length > 0) {
+				const pos: vscode.Range = args[0];
+				const lineBefore = new vscode.Range(pos.start.line + 1, pos.start.character, pos.start.line + 1, pos.start.character);
+				const endOfLine = new vscode.Range(pos.start.line + 2, pos.end.character, pos.start.line + 2, pos.end.character);
+				const lineAfter = new vscode.Range(pos.end.line + 3, pos.start.character, pos.end.line + 3, pos.start.character);
+				textEditor.insertSnippet(new vscode.SnippetString("unmock();\n"), lineBefore); // Insert line before
+				textEditor.insertSnippet(new vscode.SnippetString("\n"), endOfLine);
+				textEditor.insertSnippet(new vscode.SnippetString("kcomnu();"), lineAfter);
+			}
 	});
-	vscode.languages.registerCodeLensProvider(JestTestFileSelector, new TypescriptGotoMockProvider());
+	vscode.languages.registerCodeLensProvider(JestTestFileSelector, new TypescriptInsertUnmockCodeLens());
+	// Registers lightbulb
+	vscode.languages.registerCodeActionsProvider(JestTestFileSelector, new TypeScriptInsertUnmockAction());
 
 	// Add the extension button
 	const jsonExplorer = new MockExplorer();

@@ -12,13 +12,22 @@ export function activate(context: vscode.ExtensionContext) {
 		(textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit, ...args: any[]) => {
 			textEditor.insertSnippet(new vscode.SnippetString("import { unmock, kcomnu } from \"unmock\";\n"), new vscode.Position(0, 0));
 			if (args.length > 0) {
-				const pos: vscode.Range = args[0];
-				const lineBefore = new vscode.Range(pos.start.line + 1, pos.start.character, pos.start.line + 1, pos.start.character);
-				const endOfLine = new vscode.Range(pos.start.line + 2, pos.end.character, pos.start.line + 2, pos.end.character);
-				const lineAfter = new vscode.Range(pos.end.line + 3, pos.start.character, pos.end.line + 3, pos.start.character);
-				textEditor.insertSnippet(new vscode.SnippetString("unmock();\n"), lineBefore); // Insert line before
-				textEditor.insertSnippet(new vscode.SnippetString("\n"), endOfLine);
-				textEditor.insertSnippet(new vscode.SnippetString("kcomnu();"), lineAfter);
+				// TODO: Define an interface for this?
+				const argsObj = args[0];
+				// Code to surround a single call with unmock and kcomnu
+				// const pos: vscode.Range = argsObj.relevantRange;
+				// const lineBefore = new vscode.Range(pos.start.line + 1, pos.start.character, pos.start.line + 1, pos.start.character);
+				// const endOfLine = new vscode.Range(pos.start.line + 2, pos.end.character, pos.start.line + 2, pos.end.character);
+				// const lineAfter = new vscode.Range(pos.end.line + 3, pos.start.character, pos.end.line + 3, pos.start.character);
+				// textEditor.insertSnippet(new vscode.SnippetString("unmock();\n"), lineBefore); // Insert line before
+				// textEditor.insertSnippet(new vscode.SnippetString("\n"), endOfLine);
+				// textEditor.insertSnippet(new vscode.SnippetString("kcomnu();"), lineAfter);
+				
+				const lastImportLocation: vscode.Position = argsObj.lastImportLocation;
+				// +1 to add after the last import statement, +1 to account for the addition of the unmock import
+				const afterLastImport = new vscode.Range(lastImportLocation.line + 2, 0, lastImportLocation.line + 2, 0);
+				textEditor.insertSnippet(new vscode.SnippetString("\nbeforeEach(async () => await unmock());\n" +
+																  "afterEach(() => kcomnu());\n"), afterLastImport);
 			}
 	});
 	vscode.languages.registerCodeLensProvider(JestTestFileSelector, new TypescriptInsertUnmockCodeLens());

@@ -37,7 +37,8 @@ export class MockExplorer implements vscode.TreeDataProvider<MockTreeItem> {
                     const hash = path.basename(path.dirname(fileUri.fsPath));
                     axios.post(`https://api.unmock.io:443/mocks/${hash}`, { response: JSON.stringify(fileContents) },
                         { headers: { Authorization: `Bearer ${accessToken}`}},
-                    );
+                    ).then((res) => vscode.commands.executeCommand("unmock.statusbar.text", "Sync'd with unmock cloud!"))
+                     .catch((reason) => vscode.commands.executeCommand("unmock.statusbar.text", `Unable to sync with unmock cloud - ${reason}`));
                 }
             });
 

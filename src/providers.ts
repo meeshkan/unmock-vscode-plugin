@@ -20,11 +20,10 @@ export class TypeScriptInsertUnmockAction implements vscode.CodeActionProvider {
         }
 
         const action = new vscode.CodeAction("Insert call to unmock", vscode.CodeActionKind.QuickFix);
-        const insertAction: IInsertUnmockAction = {lastImportLocation: findLastImport(srcText), addImport: true};
         action.command = {
             command: "unmock.insertUnmockToTest",
             title: "Insert call to unmock",
-            arguments: [insertAction]
+            arguments: [buildInsertUnmockActionObject(srcText)]
         };
         const diagnostic = new vscode.Diagnostic(relevantRange,
                                                  "This test file might make real calls to remote endpoints.\n" +
@@ -46,12 +45,11 @@ export class TypescriptInsertUnmockCodeLens implements vscode.CodeLensProvider {
             return;
         }
         const relevantRange = getRangeFromTextAndMatch(srcText, matchCall);
-        const insertAction: IInsertUnmockAction = {lastImportLocation: findLastImport(srcText), addImport: true};
         return [
             new vscode.CodeLens(relevantRange, {
                 command: "unmock.insertUnmockToTest",
                 title: "Insert call to unmock",
-                arguments: [insertAction]
+                arguments: [buildInsertUnmockActionObject(srcText)]
             })
         ];
     }
@@ -60,11 +58,26 @@ export class TypescriptInsertUnmockCodeLens implements vscode.CodeLensProvider {
 // The following are defined as functions and not using the const and arrow style, so we can call them
 // from anywhere in the file while keeping the exported objects at the top of this file :)
 
-function removeCommentsFromSourceText(srcText: string) {
+function buildInsertUnmockActionObject(srcText: string): IInsertUnmockAction {
+    return {
+        lastImportLocation: findLastImport(srcText),
+        unmockImportLocation: unmockImportLocation(srcText)
+    };
+}
+
+function removeCommentsFromSourceText(srcText: string): string {
     return srcText.replace(/\/\*[\s\S]*?\*\/|([^\\:]|^)\/\/.*$/gm, "");
 }
 
-function matchRequestWithoutUnmock(srcText: string) {
+function unmockImportLocation(srcText: string): vscode.Range {
+    const matchCall = srcText.match(/^import .*?"unmock".*?$/m);
+    if (matchCall === null) {
+        return new vscode.Range(0, 0, 0, 0);  // First line
+    }
+    return getRangeFromTextAndMatch(srcText, matchCall);
+}
+
+function matchRequestWithoutUnmock(srcText: string): null | RegExpMatchArray {
     // Remove comments (see https://gist.github.com/DesignByOnyx/05c2241affc9dc498379e0d819c4d756)
     const srcTextWithoutComments = removeCommentsFromSourceText(srcText);
     // Really rough sketch - look for the following as method calls
@@ -73,10 +86,10 @@ function matchRequestWithoutUnmock(srcText: string) {
         !/unmock\(/.test(srcTextWithoutComments)) {  // And there was no call to Unmock
             return srcText.match(/[\w_]+\.(?:request|get|delete|head|options|post|put|patch)\(/);
     }
-    return;
+    return null;
 }
 
-function getRangeFromTextAndMatch(srcText: string, matchCall: RegExpMatchArray) {
+function getRangeFromTextAndMatch(srcText: string, matchCall: RegExpMatchArray): vscode.Range {
     const lineNumber = srcText.substr(0, matchCall.index).split("\n").length - 1;  // -1 for zero-based
     const relevantLine = srcText.split("\n")[lineNumber];
     const lineLength = relevantLine.length;
@@ -84,7 +97,7 @@ function getRangeFromTextAndMatch(srcText: string, matchCall: RegExpMatchArray) 
     return new vscode.Range(lineNumber, firstCharInLine, lineNumber, lineLength);
 }
 
-function findLastImport(srcText: string) {
+function findLastImport(srcText: string): vscode.Position {
     const defaultPosition = new vscode.Position(0, 0);
     // Get last "import" in commentless code
     const srcTextWithoutComments = removeCommentsFromSourceText(srcText);

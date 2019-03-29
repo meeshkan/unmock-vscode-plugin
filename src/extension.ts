@@ -15,14 +15,13 @@ export function activate(context: vscode.ExtensionContext) {
 				return;
 			}
 			const argsObj = args[0];
-			textEditor.insertSnippet(new vscode.SnippetString("import { unmock, kcomnu } from \"unmock\";\n"), new vscode.Position(0, 0));
-			if (args.length > 0) {
-				const lastImportLocation = argsObj.lastImportLocation;
-				// +1 to add after the last import statement, +1 to account for the addition of the unmock import
-				const afterLastImport = new vscode.Range(lastImportLocation.line + 2, 0, lastImportLocation.line + 2, 0);
-				textEditor.insertSnippet(new vscode.SnippetString("\nbeforeEach(async () => await unmock());\n" +
-																  "afterEach(() => kcomnu());\n"), afterLastImport);
-			}
+			textEditor.insertSnippet(new vscode.SnippetString("import { unmock, kcomnu } from \"unmock\";\n"),
+									 argsObj.unmockImportLocation);
+			const lastImportLocation = argsObj.lastImportLocation;
+			// +1 to add after the last import statement, +1 to account for the addition of the unmock import
+			const afterLastImport = new vscode.Range(lastImportLocation.line + 2, 0, lastImportLocation.line + 2, 0);
+			textEditor.insertSnippet(new vscode.SnippetString("\nbeforeEach(async () => await unmock());\n" +
+																"afterEach(() => kcomnu());\n"), afterLastImport);
 	});
 	vscode.languages.registerCodeLensProvider(JestTestFileSelector, new TypescriptInsertUnmockCodeLens());
 	// Registers lightbulb

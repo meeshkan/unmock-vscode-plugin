@@ -7,6 +7,31 @@ export const TestJSFolderFilter: vscode.DocumentFilter = {scheme: "file", patter
 export const TestsJSFolderFilter: vscode.DocumentFilter = {scheme: "file", pattern: `**/tests/*.${JS_SUFFIXES}`}; // under "tests" folder
 export const AllJSFileFilters = [TestJSFilter, TestJSFolderFilter, TestsJSFolderFilter];
 
+export class InsertUnmockHoverProvider implements vscode.HoverProvider {
+    provideHover(document: vscode.TextDocument,
+                 position: vscode.Position,
+                 token: vscode.CancellationToken): vscode.ProviderResult<vscode.Hover> {
+        const srcText = document.getText();
+        const matchCall = matchJSRequestWithoutUnmock(srcText);
+        if (!matchCall) {
+            return;
+        }
+        const relevantRange = getRangeFromTextAndMatch(srcText, matchCall);
+        if (!relevantRange.contains(position)) {
+            return;
+        }
+        const commandUri = vscode.Uri.parse(`command:unmock.insertUnmockToTest?${
+            encodeURIComponent(JSON.stringify(buildTypescriptUnmockActionObject(srcText)))
+        }`);
+        const content = new vscode.MarkdownString("### Unmock\n" +
+                                                  "You should probably use Unmock here to intercept calls to 3rd party APIs.\n" +
+                                                  "We promise to send back reliable, semantically correct mocked responses for your tests.\n\n" +
+                                                  `[Insert unmock](${commandUri})`);
+        content.isTrusted = true;
+        return new vscode.Hover(content);
+    }
+}
+
 export class TypeScriptInsertUnmockAction implements vscode.CodeActionProvider {
     provideCodeActions(document: vscode.TextDocument,
                        range: vscode.Range | vscode.Selection,
@@ -43,7 +68,6 @@ export class TypescriptInsertUnmockCodeLens implements vscode.CodeLensProvider {
     provideCodeLenses(document: vscode.TextDocument, token: vscode.CancellationToken): vscode.ProviderResult<vscode.CodeLens[]> {
         const srcText = document.getText();
         const matchCall = matchJSRequestWithoutUnmock(srcText);
-        findLastJSImport(srcText);
         if (!matchCall) {
             return;
         }

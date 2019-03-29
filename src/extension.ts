@@ -5,7 +5,8 @@ import * as ini from "ini";
 import * as os from "os";
 import { IInsertUnmockAction } from "./interfaces";
 import { MockExplorer, MockTreeItem } from "./explorer";
-import { AllJSFileFilters, TypescriptInsertUnmockCodeLens, TypeScriptInsertUnmockAction } from "./providers";
+import { AllJSFileFilters, TypescriptInsertUnmockCodeLens, TypeScriptInsertUnmockAction,
+		 InsertUnmockHoverProvider } from "./providers";
 import { getImportStatement, getTestCalls } from "./utils";
 
 export function activate(context: vscode.ExtensionContext) {
@@ -23,6 +24,7 @@ export function activate(context: vscode.ExtensionContext) {
 			const afterLastImport = new vscode.Range(lastImportLocation.line + 2, 0, lastImportLocation.line + 2, 0);
 			textEditor.insertSnippet(new vscode.SnippetString(`\n${getTestCalls(argsObj.lang)}\n`), afterLastImport);
 	});
+	vscode.languages.registerHoverProvider(AllJSFileFilters, new InsertUnmockHoverProvider());
 	vscode.languages.registerCodeLensProvider(AllJSFileFilters, new TypescriptInsertUnmockCodeLens());
 	// Registers lightbulb
 	vscode.languages.registerCodeActionsProvider(AllJSFileFilters, new TypeScriptInsertUnmockAction());

@@ -5,7 +5,8 @@ import * as ini from "ini";
 import * as os from "os";
 import { IInsertUnmockAction } from "./interfaces";
 import { MockExplorer, MockTreeItem } from "./explorer";
-import { JestTestFileSelector, TypescriptInsertUnmockCodeLens, TypeScriptInsertUnmockAction } from "./providers";
+import { AllJSFileFilters, TypescriptInsertUnmockCodeLens, TypeScriptInsertUnmockAction } from "./providers";
+import { getImportStatement, getTestCalls } from "./utils";
 
 export function activate(context: vscode.ExtensionContext) {
 	// Add the suggestion CodeLens
@@ -15,17 +16,16 @@ export function activate(context: vscode.ExtensionContext) {
 				return;
 			}
 			const argsObj = args[0];
-			textEditor.insertSnippet(new vscode.SnippetString("import { unmock, kcomnu } from \"unmock\";\n"),
+			textEditor.insertSnippet(new vscode.SnippetString(`${getImportStatement(argsObj.lang)}\n`),
 									 argsObj.unmockImportLocation);
 			const lastImportLocation = argsObj.lastImportLocation;
 			// +1 to add after the last import statement, +1 to account for the addition of the unmock import
 			const afterLastImport = new vscode.Range(lastImportLocation.line + 2, 0, lastImportLocation.line + 2, 0);
-			textEditor.insertSnippet(new vscode.SnippetString("\nbeforeEach(async () => await unmock());\n" +
-																"afterEach(() => kcomnu());\n"), afterLastImport);
+			textEditor.insertSnippet(new vscode.SnippetString(`\n${getTestCalls(argsObj.lang)}\n`), afterLastImport);
 	});
-	vscode.languages.registerCodeLensProvider(JestTestFileSelector, new TypescriptInsertUnmockCodeLens());
+	vscode.languages.registerCodeLensProvider(AllJSFileFilters, new TypescriptInsertUnmockCodeLens());
 	// Registers lightbulb
-	vscode.languages.registerCodeActionsProvider(JestTestFileSelector, new TypeScriptInsertUnmockAction());
+	vscode.languages.registerCodeActionsProvider(AllJSFileFilters, new TypeScriptInsertUnmockAction());
 
 	// Add the extension button
 	const jsonExplorer = new MockExplorer();

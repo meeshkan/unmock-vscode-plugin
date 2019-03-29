@@ -2,6 +2,20 @@ import axios from "axios";
 import * as vscode from "vscode";
 import * as fs from "fs";
 
+export function getImportStatement(lang: string): string | undefined {
+    lang = lang.toLowerCase();
+    if (lang === "typescript" || lang === "javascript") {
+        return "import { unmock, kcomnu } from \"unmock\"";
+    }
+}
+
+export function getTestCalls(lang: string): string | undefined {
+    lang = lang.toLowerCase();
+    if (lang === "typescript" || lang === "javascript") {
+        return "beforeEach(async () => await unmock());\nafterEach(() => kcomnu());";
+    }
+}
+
 export async function getAccessToken() {
     const refreshToken = getRefreshToken();
     if (refreshToken === undefined) {

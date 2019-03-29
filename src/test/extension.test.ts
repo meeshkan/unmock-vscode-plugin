@@ -22,3 +22,5 @@ suite("Extension Tests", function () {
         axios.get("https://www.example.com");
     });
 });
+
+axios.put("/lol");

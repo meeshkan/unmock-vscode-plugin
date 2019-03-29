@@ -16,8 +16,9 @@ export class InsertUnmockHoverProvider implements vscode.HoverProvider {
         if (!matchCall) {
             return;
         }
-        const relevantRange = getRangeFromTextAndMatch(srcText, matchCall);
-        if (!relevantRange.contains(position)) {
+        const relevantRanges = getRangeFromTextAndMatch(srcText, matchCall);
+        const relevantRange = relevantRanges.filter(occRange => occRange.contains(position));
+        if (relevantRange.length !== 1) {
             return;
         }
         const commandUri = vscode.Uri.parse(`command:unmock.insertUnmockToTest?${
@@ -42,8 +43,9 @@ export class TypeScriptInsertUnmockAction implements vscode.CodeActionProvider {
         if (!matchCall) {
             return;
         }
-        const relevantRange = getRangeFromTextAndMatch(srcText, matchCall);
-        if (!relevantRange.contains(range)) {
+        const relevantRanges = getRangeFromTextAndMatch(srcText, matchCall);
+        const relevantRange = relevantRanges.filter(occRange => occRange.contains(range));
+        if (relevantRange.length !== 1) {
             return;
         }
 
@@ -53,7 +55,7 @@ export class TypeScriptInsertUnmockAction implements vscode.CodeActionProvider {
             title: "Insert call to unmock",
             arguments: [buildTypescriptUnmockActionObject(srcText)]
         };
-        const diagnostic = new vscode.Diagnostic(relevantRange,
+        const diagnostic = new vscode.Diagnostic(relevantRange[0],
                                                  "This test file might make real calls to remote endpoints.\n" +
                                                  "You can use unmock to intercept these and get semantically " +
                                                  "correct mocked responses instead.",
@@ -71,7 +73,7 @@ export class TypescriptInsertUnmockCodeLens implements vscode.CodeLensProvider {
         if (!matchCall) {
             return;
         }
-        const relevantRange = getRangeFromTextAndMatch(srcText, matchCall);
+        const relevantRange = getRangeFromTextAndMatch(srcText, matchCall)[0];
         return [
             new vscode.CodeLens(relevantRange, {
                 command: "unmock.insertUnmockToTest",
@@ -102,7 +104,7 @@ function unmockJSImportLocation(srcText: string): vscode.Range {
     if (matchCall === null) {
         return new vscode.Range(0, 0, 0, 0);  // First line
     }
-    return getRangeFromTextAndMatch(srcText, matchCall);
+    return getRangeFromTextAndMatch(srcText, matchCall)[0];
 }
 
 function matchJSRequestWithoutUnmock(srcText: string): null | RegExpMatchArray {
@@ -112,17 +114,24 @@ function matchJSRequestWithoutUnmock(srcText: string): null | RegExpMatchArray {
     if (/[\w_]+\.(?:request|get|delete|head|options|post|put|patch)\(/.test(srcTextWithoutComments) &&
         /axios|superagent|request|fetch|supertest/.test(srcTextWithoutComments) &&  // And one of these libraries has to be used
         !/unmock\(/.test(srcTextWithoutComments)) {  // And there was no call to Unmock
-            return srcText.match(/[\w_]+\.(?:request|get|delete|head|options|post|put|patch)\(/);
+            return srcText.match(/[\w_]+\.(?:request|get|delete|head|options|post|put|patch)\(/g);
     }
     return null;
 }
 
-function getRangeFromTextAndMatch(srcText: string, matchCall: RegExpMatchArray): vscode.Range {
-    const lineNumber = srcText.substr(0, matchCall.index).split("\n").length - 1;  // -1 for zero-based
-    const relevantLine = srcText.split("\n")[lineNumber];
-    const lineLength = relevantLine.length;
-    const firstCharInLine = relevantLine.length - relevantLine.trimLeft().length;
-    return new vscode.Range(lineNumber, firstCharInLine, lineNumber, lineLength);
+function getRangeFromTextAndMatch(srcText: string, matchCall: RegExpMatchArray): vscode.Range[] {
+    let lastPosition = 0;
+    const splittedSrcText = srcText.split("\n");
+    return matchCall.map((match) => {
+        // -1 for zero-based
+        const pos = srcText.indexOf(match, lastPosition);
+        lastPosition += pos;
+        const lineNumber = srcText.substr(0, pos).split("\n").length - 1;
+        const relevantLine = splittedSrcText[lineNumber];
+        const lineLength = relevantLine.length;
+        const firstCharInLine = relevantLine.length - relevantLine.trimLeft().length;
+        return new vscode.Range(lineNumber, firstCharInLine, lineNumber, lineLength);
+    });
 }
 
 function findLastJSImport(srcText: string): vscode.Position {

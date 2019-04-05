@@ -5,6 +5,7 @@
 	"description": "Unmock plugin for VSCode",
 	"license": "MIT",
 	"version": "0.0.1",
+	"repository": "https://github.com/unmock/unmock-vscode-plugin",
 	"engines": {
 		"vscode": "^1.32.0"
 	},

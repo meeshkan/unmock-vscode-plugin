@@ -4,6 +4,7 @@
 	"displayName": "unmock-vs",
 	"description": "Unmock plugin for VSCode",
 	"license": "MIT",
+        "icon": "resources/unmock-extension-logo.png",
 	"version": "0.0.0",
 	"repository": {
 		"type": "git",

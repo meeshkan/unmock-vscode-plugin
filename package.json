@@ -39,7 +39,7 @@
 					"unmock.path": {
 						"type": "string",
 						"default": ".unmock",
-						"description": "Default path to look for stored credentials (relative to the workspace ror absolute path)."
+						"description": "Default path to look for stored credentials (relative to the workspace or absolute path)."
 					}
 				}
 			}

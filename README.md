@@ -27,6 +27,6 @@ Unmock Visual Studio Code plugin - synchronizing seamlessly with all your unmock
 ## Release Notes
 
 ### 0.0.0
-
+Released: 10/04/2019.  
 Initial release, limited functionality.
 

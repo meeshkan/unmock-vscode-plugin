@@ -2,39 +2,43 @@ import * as vscode from "vscode";
 import * as fs from "fs";
 import * as path from "path";
 import axios from "axios";
-import { getAccessToken, verifyFileIsBodyJson } from "./utils";
+import { getAccessToken, verifyFileHasBodyJson } from "./utils";
+
+const UNMOCK_METADATA_FILENAME = "metadata.unmock.yml";
+const UNMOCK_METADATA_SUFFIX = "unmock.yml";
 
 export class MockExplorer implements vscode.TreeDataProvider<MockTreeItem> {
     private _tree: MockTreeItem[] = [];
     private watcher: vscode.FileSystemWatcher | undefined;
     private mockPath: string | undefined;
-    private mockRelativePattern: vscode.RelativePattern | undefined;
-    private locationOfJsons: string[] = [];
+    private mockRelativePattern: vscode.RelativePattern | string;
+    private locationOfMocks: string[] = [];
     private _onDidChangeTreeData = new vscode.EventEmitter<MockTreeItem>();
     onDidChangeTreeData = this._onDidChangeTreeData.event;
 
     constructor() {
+        this.mockRelativePattern = `**/*.{json,${UNMOCK_METADATA_SUFFIX}}`;
         const rootPath = vscode.workspace.rootPath;
         if (rootPath !== undefined) {
-            // Assumes mocks saved in <workspace>/<configuration unmock path (.unmock by default)>/save/
-            this.mockPath = path.join(rootPath, vscode.workspace.getConfiguration("unmock").path, "save");
-            this.mockRelativePattern = new vscode.RelativePattern(this.mockPath, "**/*.json");
+            this.mockPath = rootPath;
+            this.mockRelativePattern = new vscode.RelativePattern(this.mockPath, `**/*.{json,${UNMOCK_METADATA_SUFFIX}}`);
             this.hardRefresh();
 
-            this.watcher = vscode.workspace.createFileSystemWatcher("**/*.json");
+            this.watcher = vscode.workspace.createFileSystemWatcher(this.mockRelativePattern);
             this.watcher.onDidChange(async fileUri => {
                 // See if the JSON is valid - otherwise don't every bother
-                const fileContents = verifyFileIsBodyJson(fileUri.fsPath);
-
+                const fileContents = verifyFileHasBodyJson(fileUri.fsPath);
+                if (fileContents === undefined) {
+                    return;
+                }
                 const accessToken = await getAccessToken();
-                console.log("Access Token " + accessToken);
                 if (accessToken !== undefined) {
                     // The following assumes the structure is <hashcode>/file.json!!
                     const hash = path.basename(path.dirname(fileUri.fsPath));
-                    console.log("Hash - " + hash);
-                    axios.post(`https://api.unmock.io:443/mocks/${hash}`, { response: fileContents },
+                    axios.post(`https://api.unmock.io:443/mocks/${hash}`, { response: JSON.stringify(fileContents) },
                         { headers: { Authorization: `Bearer ${accessToken}`}},
-                    );
+                    ).then((res) => vscode.commands.executeCommand("unmock.statusbar.text", "Sync'd with unmock cloud!"))
+                     .catch((reason) => vscode.commands.executeCommand("unmock.statusbar.text", `Unable to sync with unmock cloud - ${reason}`));
                 }
             });
 
@@ -73,9 +77,19 @@ export class MockExplorer implements vscode.TreeDataProvider<MockTreeItem> {
     }
 
     private hardRefresh() {
-        this.locationOfJsons = [];  // Clear known jsons location
-        vscode.workspace.findFiles(this.mockRelativePattern || "**/*.json").then(filepaths => {
-            filepaths.forEach(fp => this.locationOfJsons.push(fp.fsPath));
+        this.locationOfMocks = [];  // Clear known mocks location
+        vscode.workspace.findFiles(this.mockRelativePattern).then(filepaths => {
+            filepaths.forEach(fp => {
+                // Check if a metadata file exists in the same location
+                const basename = path.basename(fp.fsPath);
+                if (basename !== UNMOCK_METADATA_FILENAME) {
+                    const metadataFile = fp.fsPath.replace(basename, `${UNMOCK_METADATA_FILENAME}`);
+                    // Filter by matching filepaths
+                    if (filepaths.reduce((acc, fileUri) => acc || fileUri.fsPath === metadataFile, false)) {
+                        this.locationOfMocks.push(fp.fsPath);
+                    }
+                }
+            });
             const rootPath = vscode.workspace.rootPath;
             if (rootPath === undefined) {
                 this._tree = [];
@@ -117,12 +131,12 @@ export class MockExplorer implements vscode.TreeDataProvider<MockTreeItem> {
             return [];
         }
         const dir = rootDir ? (rootDir.endsWith("/") ? rootDir : rootDir + "/") : "";
-        if (this.directoryIsKnownToContainJson(dir) === false) {
+        if (this.directoryIsKnownToContainMock(dir) === false) {
             return [];
         }
         const filePaths = fs.readdirSync(dir);
         return filePaths.map(relativePath => path.join(dir, relativePath)).filter(fp => {
-            if (this.directoryIsKnownToContainJson(fp) === false) {
+            if (this.directoryIsKnownToContainMock(fp) === false) {
                 return false;
             }
             return MockExplorer.isJsonFile(fp, true);
@@ -137,9 +151,9 @@ export class MockExplorer implements vscode.TreeDataProvider<MockTreeItem> {
         return (fileStats.isFile() && fp.endsWith(".json")) || (directoryOK && fileStats.isDirectory());
     }
 
-    private directoryIsKnownToContainJson(directory: string) {
+    private directoryIsKnownToContainMock(directory: string) {
         let directoryIsKnownToContainJson = false;
-        this.locationOfJsons.forEach(location => {
+        this.locationOfMocks.forEach(location => {
             directoryIsKnownToContainJson = directoryIsKnownToContainJson || location.indexOf(directory) > -1;
         });
         return directoryIsKnownToContainJson;

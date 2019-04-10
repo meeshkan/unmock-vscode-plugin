@@ -2,6 +2,20 @@ import axios from "axios";
 import * as vscode from "vscode";
 import * as fs from "fs";
 
+export function getImportStatement(lang: string): string | undefined {
+    lang = lang.toLowerCase();
+    if (lang === "typescript" || lang === "javascript") {
+        return "import { unmock, kcomnu } from \"unmock\"";
+    }
+}
+
+export function getTestCalls(lang: string): string | undefined {
+    lang = lang.toLowerCase();
+    if (lang === "typescript" || lang === "javascript") {
+        return "beforeEach(async () => await unmock());\nafterEach(() => kcomnu());";
+    }
+}
+
 export async function getAccessToken() {
     const refreshToken = getRefreshToken();
     if (refreshToken === undefined) {
@@ -15,16 +29,13 @@ export async function getAccessToken() {
     }
 }
 
-export function verifyFileIsBodyJson(filepath: string) {
+export function verifyFileHasBodyJson(filepath: string) {
     // Returns file contents if it is a valid json for a body response
     // Returns undefined otherwise
     const fileContents = fs.readFileSync(filepath, 'utf-8');
     try {
         const parsedContent = JSON.parse(fileContents);
-        if (parsedContent["unmock-hash"] !== undefined) {
-            return; // This is a headers file -- we don't **really** care about that...
-        }
-        return fileContents;
+        return parsedContent["body"];
     } catch {
         return;
     }

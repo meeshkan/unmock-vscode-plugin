@@ -13,21 +13,20 @@ Unmock Visual Studio Code plugin - synchronizing seamlessly with all your unmock
 - Syncing updates JSON mock files to unmock cloud
 - Suggestion to use unmock in javascript/typescript test files, where calls are made to 3rd party APIs.
   - Adds a `beforeEach`, `afterEach` and `import` statements to use unmock.
-- *No* tests or official published package yet
 - Roadmapped for further extensions, features and integrations.
 
 
-## Requirements
-
-
 ## Extension Settings
-
+- `refreshToken`: The refresh token to get when you registered for unmock. Used for various operations with the remote unmock service.
+- `path`: Default path to look for stored credentials (relative to the workspace or absolute path).
 
 ## Known Issues
-
+- Only initial release at the moment.
+- Manually tested
 
 ## Release Notes
 
-### 1.0.0
+### 0.0.0
 
-Initial release of ...
+Initial release, limited functionality.
+

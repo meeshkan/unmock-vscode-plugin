@@ -4,7 +4,8 @@
 	"displayName": "unmock-vs",
 	"description": "Unmock plugin for VSCode",
 	"license": "MIT",
-	"version": "0.0.1",
+        "icon": "resources/unmock-extension-logo.png",
+	"version": "0.0.0",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/unmock/unmock-vscode-plugin"
@@ -38,7 +39,7 @@
 					"unmock.path": {
 						"type": "string",
 						"default": ".unmock",
-						"description": "Default path to look for stored credentials (relative to the workspace ror absolute path)."
+						"description": "Default path to look for stored credentials (relative to the workspace or absolute path)."
 					}
 				}
 			}

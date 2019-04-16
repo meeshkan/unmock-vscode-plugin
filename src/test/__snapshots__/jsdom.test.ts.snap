@@ -1,0 +1,109 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`unmock end to end jsdom 1`] = `
+{
+  "hash": "5a2e318a",
+  "host": "www.behance.net",
+  "method": "GET",
+  "path": "/v2/projects?api_key=u_n_m_o_c_k_200"
+}
+`;
+
+exports[`unmock end to end jsdom 2`] = `
+{
+  "hash": "5a2e318a",
+  "host": "www.behance.net",
+  "method": "GET",
+  "path": "/v2/projects?api_key=u_n_m_o_c_k_200"
+}
+`;
+
+exports[`unmock end to end jsdom 3`] = `
+{
+  "hash": "5a2e318a",
+  "host": "www.behance.net",
+  "method": "GET",
+  "path": "/v2/projects?api_key=u_n_m_o_c_k_200"
+}
+`;
+
+exports[`unmock end to end jsdom 4`] = `
+{
+  "hash": "9951ef56",
+  "host": "www.behance.net",
+  "method": "GET",
+  "path": "/v2/projects/7550?api_key=u_n_m_o_c_k_200"
+}
+`;
+
+exports[`unmock end to end jsdom 5`] = `
+{
+  "hash": "9951ef56",
+  "host": "www.behance.net",
+  "method": "GET",
+  "path": "/v2/projects/7550?api_key=u_n_m_o_c_k_200"
+}
+`;
+
+exports[`unmock end to end jsdom 6`] = `
+{
+  "hash": "9951ef56",
+  "host": "www.behance.net",
+  "method": "GET",
+  "path": "/v2/projects/7550?api_key=u_n_m_o_c_k_200"
+}
+`;
+
+exports[`unmock end to end jsdom 7`] = `
+{
+  "hash": "ed5f031b",
+  "host": "www.behance.net",
+  "method": "GET",
+  "path": "/v2/projects/7550/comments?api_key=u_n_m_o_c_k_200"
+}
+`;
+
+exports[`unmock end to end jsdom 8`] = `
+{
+  "hash": "ed5f031b",
+  "host": "www.behance.net",
+  "method": "GET",
+  "path": "/v2/projects/7550/comments?api_key=u_n_m_o_c_k_200"
+}
+`;
+
+exports[`unmock end to end jsdom 9`] = `
+{
+  "hash": "ed5f031b",
+  "host": "www.behance.net",
+  "method": "GET",
+  "path": "/v2/projects/7550/comments?api_key=u_n_m_o_c_k_200"
+}
+`;
+
+exports[`unmock end to end jsdom 10`] = `
+{
+  "hash": "ec4aae71",
+  "host": "api.hubapi.com",
+  "method": "POST",
+  "path": "/contacts/v1/contact/createOrUpdate/email/testingapis@hubspot.com/?hapikey=demo"
+}
+`;
+
+exports[`unmock end to end jsdom 11`] = `
+{
+  "hash": "ec4aae71",
+  "host": "api.hubapi.com",
+  "method": "POST",
+  "path": "/contacts/v1/contact/createOrUpdate/email/testingapis@hubspot.com/?hapikey=demo"
+}
+`;
+
+exports[`unmock end to end jsdom 12`] = `
+{
+  "hash": "ec4aae71",
+  "host": "api.hubapi.com",
+  "method": "POST",
+  "path": "/contacts/v1/contact/createOrUpdate/email/testingapis@hubspot.com/?hapikey=demo"
+}
+`;

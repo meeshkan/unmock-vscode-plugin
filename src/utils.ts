@@ -48,3 +48,28 @@ export function getConfig() {
 function getRefreshToken(): string | undefined {
     return getConfig().refreshToken;
 }
+
+const JS_SUFFIXES = "{js,ts,tsx,jsx}"; // es,es6,ts.erb?
+export const TestJSFilter: vscode.DocumentFilter = {scheme: "file", pattern: `**/*.test.*${JS_SUFFIXES}`}; // containing ".test." in filename
+export const TestJSFolderFilter: vscode.DocumentFilter = {scheme: "file", pattern: `**/test/*.${JS_SUFFIXES}`}; // under "test" folder
+export const TestsJSFolderFilter: vscode.DocumentFilter = {scheme: "file", pattern: `**/tests/*.${JS_SUFFIXES}`}; // under "tests" folder
+export const AllJSFileFilters = [TestJSFilter, TestJSFolderFilter, TestsJSFolderFilter];
+
+export function removeJSCommentsFromSourceText(srcText: string): string {
+  return srcText.replace(/\/\*[\s\S]*?\*\/|([^\\:]|^)\/\/.*$/gm, "");
+}
+
+export function getRangeFromTextAndMatch(srcText: string, matchCall: RegExpMatchArray): vscode.Range[] {
+  let lastPosition = 0;
+  const splittedSrcText = srcText.split("\n");
+  return matchCall.map((match) => {
+      // -1 for zero-based
+      const pos = srcText.indexOf(match, lastPosition);
+      lastPosition += pos;
+      const lineNumber = srcText.substr(0, pos).split("\n").length - 1;
+      const relevantLine = splittedSrcText[lineNumber];
+      const lineLength = relevantLine.length;
+      const firstCharInLine = relevantLine.length - relevantLine.trimLeft().length;
+      return new vscode.Range(lineNumber, firstCharInLine, lineNumber, lineLength);
+  });
+}

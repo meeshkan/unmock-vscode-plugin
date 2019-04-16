@@ -5,9 +5,9 @@ import * as ini from "ini";
 import * as os from "os";
 import { IInsertUnmockAction } from "./interfaces";
 import { MockExplorer, MockTreeItem } from "./explorer";
-import { AllJSFileFilters, TypescriptInsertUnmockCodeLens, TypeScriptInsertUnmockAction,
-		 InsertUnmockHoverProvider } from "./providers";
-import { getImportStatement, getTestCalls, getConfig } from "./utils";
+import { TypescriptInsertUnmockCodeLens, TypeScriptInsertUnmockAction,
+		 InsertUnmockHoverProvider } from "./providers/insert-unmock";
+import { getImportStatement, getTestCalls, getConfig, AllJSFileFilters } from "./utils";
 
 const insertUnmockToTest = (textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit, ...args: IInsertUnmockAction[]) => {
   if (args.length === 0) { // No args given

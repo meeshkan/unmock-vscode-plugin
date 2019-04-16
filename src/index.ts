@@ -6,7 +6,8 @@ import * as os from "os";
 import { IInsertUnmockAction } from "./interfaces";
 import { MockExplorer, MockTreeItem } from "./explorer";
 import { TypescriptInsertUnmockCodeLens, TypeScriptInsertUnmockAction,
-		 InsertUnmockHoverProvider } from "./providers/insert-unmock";
+         InsertUnmockHoverProvider } from "./providers/insert-unmock";
+import { LinkMockHoverProvider } from "./providers/link-tests-mocks";
 import { getImportStatement, getTestCalls, getConfig, AllJSFileFilters } from "./utils";
 
 const insertUnmockToTest = (textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit, ...args: IInsertUnmockAction[]) => {
@@ -59,7 +60,8 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.languages.registerCodeActionsProvider(AllJSFileFilters, new TypeScriptInsertUnmockAction());
   }
   // Register hover provider (suggests adding unmock in tooltips)
-	vscode.languages.registerHoverProvider(AllJSFileFilters, new InsertUnmockHoverProvider());
+  vscode.languages.registerHoverProvider(AllJSFileFilters, new InsertUnmockHoverProvider());
+  vscode.languages.registerHoverProvider(AllJSFileFilters, new LinkMockHoverProvider());
 
 	// Add the extension button
 	const jsonExplorer = new MockExplorer();

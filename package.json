@@ -21,7 +21,7 @@
 		"onLanguage:javascript",
 		"onLanguage:typescript"
 	],
-	"main": "./out/extension.js",
+	"main": "./out/index.js",
 	"contributes": {
 		"configuration": [
 			{
@@ -40,7 +40,17 @@
 						"type": "string",
 						"default": ".unmock",
 						"description": "Default path to look for stored credentials (relative to the workspace or absolute path)."
-					}
+          },
+          "unmock.codeLens": {
+            "type": "boolean",
+            "default": false,
+            "description": "Use CodeLens to suggest places to use unmock; we will only present a single CodeLens suggestions to keep your vertical space tidy."
+          },
+          "unmock.lightbulb": {
+            "type": "boolean",
+            "default": false,
+            "description": "Use the light bulb to suggest places to use unmock when editing relevant lines."
+          }
 				}
 			}
 		],

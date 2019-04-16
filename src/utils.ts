@@ -5,7 +5,7 @@ import * as fs from "fs";
 export function getImportStatement(lang: string): string | undefined {
     lang = lang.toLowerCase();
     if (lang === "typescript" || lang === "javascript") {
-        return "import { unmock, kcomnu } from \"unmock\"";
+        return "import { unmock, kcomnu } from \"unmock\";";
     }
 }
 
@@ -41,7 +41,10 @@ export function verifyFileHasBodyJson(filepath: string) {
     }
 }
 
+export function getConfig() {
+  return vscode.workspace.getConfiguration("unmock");
+}
+
 function getRefreshToken(): string | undefined {
-    const config = vscode.workspace.getConfiguration("unmock");
-    return config.refreshToken;
+    return getConfig().refreshToken;
 }

@@ -2,7 +2,10 @@ import * as vscode from "vscode";
 import * as fs from "fs";
 import * as path from "path";
 import * as _ from "lodash";
-import { removeJSCommentsFromSourceText, getRangeFromTextAndMatch, removeStringsFromSourceText } from "../utils";
+import { removeJSCommentsFromSourceText,
+         getRangeFromTextAndMatch,
+         removeStringsFromSourceText,
+         countInString } from "../utils";
 import { ITestSnap } from "../interfaces";
 
 export class LinkMockHoverProvider implements vscode.HoverProvider {
@@ -17,7 +20,6 @@ export class LinkMockHoverProvider implements vscode.HoverProvider {
       return;
     }
     const snap = new Snap(file.fsPath);
-    // TODO - need to compensate for comments, as it offsets line results
     const srcText = removeJSCommentsFromSourceText(document.getText());
     const relevantRanges = findRangesFromTestNames(srcText, snap.tests);
     let matchingTestIndex = -1;
@@ -53,10 +55,12 @@ export class LinkMockHoverProvider implements vscode.HoverProvider {
 
     const content = new vscode.MarkdownString();
     relevantTestSnap.forEach(snp => { // TODO - fix the link
-      content.appendMarkdown(`[${snp.hash}](${
-        vscode.Uri.parse(`command:vscode.window.showTextDocument?${encodeURIComponent("./index.ts")}`)
-      }):` +
-        `\t_${snp.method.toUpperCase()}_ [${snp.host}${snp.path}]()  \n`);  // Should host/path be trimmed ?
+      content.appendMarkdown(`[${snp.hash}]` +
+      // `(${
+        // vscode.Uri.parse(`command:vscode.window.showTextDocument?${encodeURIComponent("./index.ts")}`)
+      // })`
+      `(file://index.ts)`
+        + `: \t _${snp.method.toUpperCase()}_ [${snp.host}${snp.path}]()  \n`);  // Should host/path be trimmed ?
     });
     content.isTrusted = true;
     return new vscode.Hover(content);
@@ -97,7 +101,7 @@ const SNAPSHOT_SUFFIX = ".snap";
 const SNAPSHOT_KEYWORDS = ["\"hash\":", "\"host\":", "\"method\":", "\"path\":"];
 
 function countBracesInLine(line: string) {
-  return (line.match(/\{/g) || []).length - (line.match(/\}/g) || []).length;
+  return countInString(line, '{') - countInString(line, '}');
 }
 
 function findBalancedCurlyBraces(location: vscode.Range, srcText: string[]): vscode.Range {

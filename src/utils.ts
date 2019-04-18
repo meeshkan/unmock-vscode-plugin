@@ -56,7 +56,14 @@ export const TestsJSFolderFilter: vscode.DocumentFilter = {scheme: "file", patte
 export const AllJSFileFilters = [TestJSFilter, TestJSFolderFilter, TestsJSFolderFilter];
 
 export function removeJSCommentsFromSourceText(srcText: string): string {
-  return srcText.replace(/\/\*[\s\S]*?\*\/|([^\\:]|^)\/\/.*$/gm, "");
+  // Replaces comments with newlines to maintain line count.
+  return srcText.replace(/\/\*[\s\S]*?\*\/|([^\\:]|^)\/\/.*$/gm, (match) => {
+    return "\n".repeat(countInString(match, "\n"));
+  });
+}
+
+export function countInString(str: string, substr: string) {
+  return (str.match(new RegExp(substr, "g")) || []).length;
 }
 
 export function removeStringsFromSourceText(srcText: string): string {

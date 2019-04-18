@@ -5,7 +5,8 @@ import * as _ from "lodash";
 import { removeJSCommentsFromSourceText,
          getRangeFromTextAndMatch,
          removeStringsFromSourceText,
-         countInString } from "../utils";
+         countInString,
+         findPositionInRanges } from "../utils";
 import { ITestSnap } from "../interfaces";
 import { mockExplorer } from "../index";
 
@@ -28,19 +29,10 @@ export class LinkMockHoverProvider implements vscode.HoverProvider {
     // Find the ranges for different tests that are recorded in the snapshot
     const relevantRanges = findRangesFromTestNames(srcText, snap.tests);
     // Test if any of the ranges apply for current position; otherwise we don't need to show information
-    let matchingTestIndex = -1;
-    let i = 0;
-    while (i < relevantRanges.length) {
-      if (relevantRanges[i].contains(position)) {
-        matchingTestIndex = i;
-        break;
-      }
-      i += 1;
-    }
+    let matchingTestIndex = findPositionInRanges(position, relevantRanges);
     if (matchingTestIndex === -1) { // None matching...
       return;
     }
-    
     const relevantTestSnap: ITestSnap[] = snap.loadTest({idx: matchingTestIndex}); // Loads the snapshot's content
 
     // Create the content to show

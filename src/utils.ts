@@ -108,3 +108,15 @@ export function getRangeFromTextAndMatch(srcText: string, searchFor: RegExpMatch
     }
   });
 }
+
+export function findPositionInRanges(position: vscode.Position, ranges: vscode.Range[]): number {
+  /**
+   * Returns the index for the Range (in `ranges`) containing `position` or -1 if none contain it.
+   */
+  for (let i = 0; i < ranges.length; i++) {
+    if (ranges[i].contains(position)) {
+      return i;
+    }
+  }
+  return -1;
+}

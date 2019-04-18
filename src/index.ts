@@ -4,7 +4,7 @@ import * as path from "path";
 import * as ini from "ini";
 import * as os from "os";
 import { IInsertUnmockAction, IMockLocation } from "./interfaces";
-import { MockExplorer, MockTreeItem } from "./explorer";
+import { MockExplorer } from "./explorer";
 import { TypescriptInsertUnmockCodeLens,
          TypeScriptInsertUnmockAction,
          InsertUnmockHoverProvider } from "./providers/insert-unmock";
@@ -63,7 +63,7 @@ export function activate(context: vscode.ExtensionContext) {
   if (config.lightbulb === true) { // Add the lightbulb suggestions (if enabled)
     vscode.languages.registerCodeActionsProvider(AllJSFileFilters, new TypeScriptInsertUnmockAction());
   }
-  // Register hover provider (suggests adding unmock in tooltips)
+  // Register hover providers
   vscode.languages.registerHoverProvider(AllJSFileFilters, new InsertUnmockHoverProvider());
   vscode.languages.registerHoverProvider(AllJSFileFilters, new LinkMockHoverProvider());
 

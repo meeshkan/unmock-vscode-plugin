@@ -76,6 +76,14 @@ export class MockExplorer implements vscode.TreeDataProvider<MockTreeItem> {
     return matchingCached && matchingCached.children.length > 0 ? matchingCached.children : this.populateChildren(element.currentPath, element);
   }
 
+  public getPathFromHash(hash: string) {
+    const filteredPaths = this.locationOfMocks.filter(fspath => fspath.indexOf(hash) !== -1);
+    if (filteredPaths.length === 0) {
+      return;
+    }
+    return filteredPaths[0];
+  }
+
   private hardRefresh() {
     this.locationOfMocks = [];  // Clear known mocks location
     vscode.workspace.findFiles(this.mockRelativePattern).then(filepaths => {

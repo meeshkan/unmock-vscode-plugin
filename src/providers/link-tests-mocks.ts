@@ -54,13 +54,11 @@ export class LinkMockHoverProvider implements vscode.HoverProvider {
     
 
     const content = new vscode.MarkdownString();
-    relevantTestSnap.forEach(snp => { // TODO - fix the link
-      content.appendMarkdown(`[${snp.hash}]` +
-      // `(${
-        // vscode.Uri.parse(`command:vscode.window.showTextDocument?${encodeURIComponent("./index.ts")}`)
-      // })`
-      `(file://index.ts)`
-        + `: \t _${snp.method.toUpperCase()}_ [${snp.host}${snp.path}]()  \n`);  // Should host/path be trimmed ?
+    relevantTestSnap.forEach(snp => {
+      const cmdUri = vscode.Uri.parse(`command:unmock.editMockByHash?${encodeURIComponent(JSON.stringify(snp.hash))}`);
+      const md = `[\`${snp.hash}\`](${cmdUri}): _${snp.method.toUpperCase()}_ ` +
+                 `[${(snp.host + snp.path).substr(0, 24) + "..."}]()  \n`;
+      content.appendMarkdown(md);
     });
     content.isTrusted = true;
     return new vscode.Hover(content);

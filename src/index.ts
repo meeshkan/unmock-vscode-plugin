@@ -11,6 +11,7 @@ import { LinkMockHoverProvider } from "./providers/link-tests-mocks";
 import { getImportStatement, getTestCalls, getConfig, AllJSFileFilters } from "./utils";
 
 const insertUnmockToTest = (textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit, ...args: IInsertUnmockAction[]) => {
+  // Adds unmock to a test file
   if (args.length === 0) { // No args given
     return;
   }
@@ -65,10 +66,18 @@ export function activate(context: vscode.ExtensionContext) {
 
 	// Add the extension button
 	const jsonExplorer = new MockExplorer();
-	vscode.window.registerTreeDataProvider("unmock.mocksExplorer", jsonExplorer);
-	vscode.commands.registerCommand("unmock.editMock", (element: MockTreeItem) => {
+  vscode.window.registerTreeDataProvider("unmock.mocksExplorer", jsonExplorer);
+
+  // Add individual commands
+	vscode.commands.registerCommand("unmock.editMock", (element: MockTreeItem) => {  // Open mock from MockTreeItem
 		vscode.commands.executeCommand("vscode.open", vscode.Uri.file(element.currentPath));
-	});
+  });
+  vscode.commands.registerCommand("unmock.editMockByHash", (hash: string) => { // Open mock from hash
+    const fspath = jsonExplorer.getPathFromHash(hash);
+    if (fspath !== undefined) {
+      vscode.commands.executeCommand("vscode.open", vscode.Uri.file(fspath));
+    }
+  });
 
 	// Create the statusbar section
 	const statusBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);

@@ -3,9 +3,10 @@ import * as fs from "fs";
 import * as path from "path";
 import * as ini from "ini";
 import * as os from "os";
-import { IInsertUnmockAction } from "./interfaces";
+import { IInsertUnmockAction, IMockLocation } from "./interfaces";
 import { MockExplorer, MockTreeItem } from "./explorer";
-import { TypescriptInsertUnmockCodeLens, TypeScriptInsertUnmockAction,
+import { TypescriptInsertUnmockCodeLens,
+         TypeScriptInsertUnmockAction,
          InsertUnmockHoverProvider } from "./providers/insert-unmock";
 import { LinkMockHoverProvider } from "./providers/link-tests-mocks";
 import { getImportStatement, getTestCalls, getConfig, AllJSFileFilters } from "./utils";
@@ -49,6 +50,8 @@ const updateRefreshToken = (config: vscode.WorkspaceConfiguration) => {
   config.update("refreshToken", refreshToken, false);
 };
 
+export let mockExplorer: undefined | MockExplorer;
+
 export function activate(context: vscode.ExtensionContext) {
   const config = getConfig();
 
@@ -64,19 +67,13 @@ export function activate(context: vscode.ExtensionContext) {
   vscode.languages.registerHoverProvider(AllJSFileFilters, new InsertUnmockHoverProvider());
   vscode.languages.registerHoverProvider(AllJSFileFilters, new LinkMockHoverProvider());
 
-	// Add the extension button
-	const jsonExplorer = new MockExplorer();
-  vscode.window.registerTreeDataProvider("unmock.mocksExplorer", jsonExplorer);
+  // Add the extension button
+  mockExplorer = new MockExplorer();
+  vscode.window.registerTreeDataProvider("unmock.mocksExplorer", mockExplorer);
 
   // Add individual commands
-	vscode.commands.registerCommand("unmock.editMock", (element: MockTreeItem) => {  // Open mock from MockTreeItem
+	vscode.commands.registerCommand("unmock.editMock", (element: IMockLocation) => {  // Open mock from MockTreeItem
 		vscode.commands.executeCommand("vscode.open", vscode.Uri.file(element.currentPath));
-  });
-  vscode.commands.registerCommand("unmock.editMockByHash", (hash: string) => { // Open mock from hash
-    const fspath = jsonExplorer.getPathFromHash(hash);
-    if (fspath !== undefined) {
-      vscode.commands.executeCommand("vscode.open", vscode.Uri.file(fspath));
-    }
   });
 
 	// Create the statusbar section

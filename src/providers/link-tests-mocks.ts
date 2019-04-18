@@ -7,13 +7,16 @@ import { removeJSCommentsFromSourceText,
          removeStringsFromSourceText,
          countInString } from "../utils";
 import { ITestSnap } from "../interfaces";
+import { mockExplorer } from "../index";
 
+// TODO is hover the best idea? Do we want a code-lens type, to show next to the matching calls, etc?
 export class LinkMockHoverProvider implements vscode.HoverProvider {
   snaps: vscode.Uri[] = [];
 
   provideHover(document: vscode.TextDocument,
                position: vscode.Position,
                token: vscode.CancellationToken): vscode.ProviderResult<vscode.Hover> {
+
     this.getSnapFiles();
     const file = this.snapFile(document.fileName);
     if (file === undefined) {
@@ -37,25 +40,18 @@ export class LinkMockHoverProvider implements vscode.HoverProvider {
     
     const relevantTestSnap: ITestSnap[] = snap.loadSnap(matchingTestIndex);
 
-    // The idea is:
-    // 1. Extract all the `exports` from the snapfile
-    // 2. Remove all final words in the snapfile and uniq them
-    // 2.a. This only applies if the final word is a number, so e.g. "unmock end to end node 1" => "unmock end to end node"
-    // 3. for each of the uniq'd words, find where they appear in sequence
-    // 4. Find the first `{` after their location, and find the matching `}`
-    // 5. Check if the position is in this range
-    // 6. If yes, show links and such?
-
-    // TODO is hover the best idea? Do we want a code-lens type, to show next to the matching calls, etc?
-
-    // We can now parse from the snap file...
-    // Check if there exists a .snap file somewhere nearby (currently only supports jest)
-
-    
-
     const content = new vscode.MarkdownString();
     relevantTestSnap.forEach(snp => {
-      const cmdUri = vscode.Uri.parse(`command:unmock.editMockByHash?${encodeURIComponent(JSON.stringify(snp.hash))}`);
+      if (mockExplorer === undefined) {
+        return;  // Can't verify mocks actually exist
+      }
+      const mockLocation = mockExplorer.getPathFromHash(snp.hash);
+      if (mockLocation === undefined) {
+        return; // Filter mocks that aren't found in the explorer
+      }
+      const cmdUri = vscode.Uri.parse(`command:unmock.editMock?${
+        encodeURIComponent(JSON.stringify({currentPath: mockLocation}))
+      }`);
       const md = `[\`${snp.hash}\`](${cmdUri}): _${snp.method.toUpperCase()}_ ` +
                  `[${(snp.host + snp.path).substr(0, 24) + "..."}]()  \n`;
       content.appendMarkdown(md);

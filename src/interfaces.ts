@@ -12,3 +12,7 @@ export interface ITestSnap {
   method: string;
   path: string;
 }
+
+export interface IMockLocation {
+  currentPath: string;
+}

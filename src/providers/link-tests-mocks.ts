@@ -17,14 +17,17 @@ export class LinkMockHoverProvider implements vscode.HoverProvider {
                position: vscode.Position,
                token: vscode.CancellationToken): vscode.ProviderResult<vscode.Hover> {
 
-    this.getSnapFiles();
-    const file = this.snapFile(document.fileName);
+    this.getSnapFiles(); // one-time getter to find snapshot files
+    const file = this.snapFile(document.fileName); // find snapshot file that matches current document
     if (file === undefined) {
       return;
     }
-    const snap = new Snap(file.fsPath);
+    const snap = new Snap(file.fsPath); // Load snapshot by creating the Snap object
     const srcText = removeJSCommentsFromSourceText(document.getText());
+
+    // Find the ranges for different tests that are recorded in the snapshot
     const relevantRanges = findRangesFromTestNames(srcText, snap.tests);
+    // Test if any of the ranges apply for current position; otherwise we don't need to show information
     let matchingTestIndex = -1;
     let i = 0;
     while (i < relevantRanges.length) {
@@ -38,8 +41,9 @@ export class LinkMockHoverProvider implements vscode.HoverProvider {
       return;
     }
     
-    const relevantTestSnap: ITestSnap[] = snap.loadSnap(matchingTestIndex);
+    const relevantTestSnap: ITestSnap[] = snap.loadTest({idx: matchingTestIndex}); // Loads the snapshot's content
 
+    // Create the content to show
     const content = new vscode.MarkdownString();
     relevantTestSnap.forEach(snp => {
       if (mockExplorer === undefined) {
@@ -165,12 +169,17 @@ class Snap {
     this.tests = _.uniq(Object.keys(this.snapContents).map(k => k.split(" ").slice(0, -1).join(" ")));
   }
 
-  public loadSnap(idx: number) {
-    if (idx < 0 || idx >= this.tests.length) {
-      throw Error("Invalid index for test snapshot.");
+  public loadTest({idx, name} : {idx?: number, name?: string}) {
+    let testName: string;
+    if (name === undefined) {
+      if (idx === undefined || idx < 0 || idx >= this.tests.length) {
+        throw Error("Invalid index for test snapshot.");
+      }
+  
+      testName = this.tests[idx];
+    } else {
+      testName = name;
     }
-
-    const testName = this.tests[idx];
     return Object.keys(this.snapContents)
       .filter(key => key.startsWith(testName))
       .map(key => JSON.parse(this.snapContents[key]));

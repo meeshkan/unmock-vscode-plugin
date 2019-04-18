@@ -59,17 +59,45 @@ export function removeJSCommentsFromSourceText(srcText: string): string {
   return srcText.replace(/\/\*[\s\S]*?\*\/|([^\\:]|^)\/\/.*$/gm, "");
 }
 
-export function getRangeFromTextAndMatch(srcText: string, matchCall: RegExpMatchArray): vscode.Range[] {
+export function removeStringsFromSourceText(srcText: string): string {
+  return srcText.replace(/(?:"[^"]*?"|'[^']*?'|`[^`]*?`)/gm, "");
+}
+
+export function getRangeFromTextAndMatch(srcText: string, searchFor: RegExpMatchArray | string[], entireLine: boolean = true): vscode.Range[] {
+  /**
+   * Constructs a `vscode.Range` object for each element in `searchFor` that's found in `srcText`.
+   * 
+   * Assumptions:
+   *  - Every element in `searchFor` is indeed in `srcText`
+   * 
+   * @param srcText - Raw source text, unsplitted (contains `\n`)
+   * @param searchFor - List of strings (or a `RegExpMatchArray`) to search in `srcText` and build a Range object for
+   * @param entireLine - Whether or not the returned Range objects will cover the entire line (ignoring indentation)
+   *    or just encapsulate the matched string.
+   * 
+   * @returns An array of `vscode.Range` objects, where each Range object describes the location
+   *  (line, start location, end location) of a matching element in `searchFor` in `srcText`.
+   */
   let lastPosition = 0;
   const splittedSrcText = srcText.split("\n");
-  return matchCall.map((match) => {
-    // -1 for zero-based
-    const pos = srcText.indexOf(match, lastPosition);
+
+  return searchFor.map((str) => {
+    const pos = srcText.indexOf(str, lastPosition);
     lastPosition += pos;
+    // -1 for zero-based
     const lineNumber = srcText.substr(0, pos).split("\n").length - 1;
     const relevantLine = splittedSrcText[lineNumber];
-    const lineLength = relevantLine.length;
-    const firstCharInLine = relevantLine.length - relevantLine.trimLeft().length;
-    return new vscode.Range(lineNumber, firstCharInLine, lineNumber, lineLength);
+
+    if (entireLine) {
+      // The Range will cover the entire line (ignoring indentation though)
+      const lineLength = relevantLine.length;
+      const firstCharInLine = relevantLine.length - relevantLine.trimLeft().length;
+      return new vscode.Range(lineNumber, firstCharInLine, lineNumber, lineLength);
+    } else {
+      // The range will only cover the matched text.
+      const firstCharLocation = relevantLine.indexOf(str);
+      const lastCharLocation = firstCharLocation + str.length;
+      return new vscode.Range(lineNumber, firstCharLocation, lineNumber, lastCharLocation);
+    }
   });
 }

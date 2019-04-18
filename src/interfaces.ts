@@ -5,3 +5,10 @@ export interface IInsertUnmockAction {
   unmockImportLocation: vscode.Range;
   lang: string;
 }
+
+export interface ITestSnap {
+  hash: string;
+  host: string;
+  method: string;
+  path: string;
+}

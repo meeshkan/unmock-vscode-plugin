@@ -15,6 +15,11 @@ Unmock Visual Studio Code plugin - synchronizing seamlessly with all your unmock
   - Adds a `beforeEach`, `afterEach` and `import` statements to use unmock.
 - Roadmapped for further extensions, features and integrations.
 
+## Dev Instructions
+- Test the plugin by running debug mode in the plugin project.
+- Compile the plugin by running `vsce package`. A `.vsix` file will be generated. Install the `.vsix` file locally by either:
+  1. Using the CLI: `code --install-extension <vsix file>`
+  1. Opening the Extension Manager in vscode (normally CTRL+SHIFT+X), and choosing `Install from VSIX...`
 
 ## Extension Settings
 - `refreshToken`: The refresh token to get when you registered for unmock. Used for various operations with the remote unmock service.

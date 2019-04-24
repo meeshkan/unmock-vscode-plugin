@@ -3,6 +3,7 @@ import * as fs from "fs";
 import * as path from "path";
 import * as ini from "ini";
 import * as os from "os";
+import { debounce } from "debounce";
 import { IMockLocation } from "./interfaces";
 import { MockExplorer } from "./explorer";
 import {
@@ -45,6 +46,38 @@ const disposables: vscode.Disposable[] = [];
 export function activate(context: vscode.ExtensionContext) {
   const config = getConfig();
 
+  /* TODO
+   * Saved in code for future reference (while still in `dev` - please delete me before merging to `master`!)
+   * Example of how to add (with CSS) comments in-line with the code.
+   * Supports markdown as needed; this could be a good replacement for codelens and less intrusive; doesn't affect vertical space.
+   * To use without slowing down the IDE, should use debounce.
+   *
+   * const t = vscode.window.createTextEditorDecorationType({
+   *   after: {
+   *     margin: "0 0 0 3em",
+   *     textDecoration: "none",
+   *   },
+   *   rangeBehavior: vscode.DecorationRangeBehavior.ClosedOpen,
+   * });
+   * vscode.window.onDidChangeTextEditorSelection(
+   *   debounce((e: vscode.TextEditorSelectionChangeEvent) => {
+   *     const editor = e.textEditor;
+   *     const endPosition = e.selections[0].active.with(undefined, Number.MAX_SAFE_INTEGER);
+   *     editor.setDecorations(t, [
+   *       {
+   *         hoverMessage: new vscode.MarkdownString("## What is this").appendMarkdown("\nthat this is"),
+   *         range: new vscode.Range(endPosition, endPosition),
+   *         renderOptions: {
+   *           after: {
+   *             contentText: "spameggs",
+   *           },
+   *         },
+   *       },
+   *     ]);
+   *   }, 250)
+   * );
+   */
+
   // This is needed for the Uri used in markdowns
   disposables.push(vscode.commands.registerTextEditorCommand("unmock.insertUnmockToTest", insertUnmockToTest));
 
@@ -53,6 +86,8 @@ export function activate(context: vscode.ExtensionContext) {
       "unmock.showMockLinkHover",
       (editor: vscode.TextEditor, edit: vscode.TextEditorEdit, ...args: any[]) => {
         const { range } = args[0];
+        // Somewhat hackish. To show the markdown-supporting Hover, the cursor (not mouse) needs to be inside the relevant range.
+        // To not-interrupt user action, effectively move the cursor to relevant position, call the showHover, and reset cursor selection.
         const curSelection = editor.selection;
         editor.selection = new vscode.Selection(range.start, range.start);
         vscode.commands.executeCommand("editor.action.showHover").then(() => (editor.selection = curSelection));

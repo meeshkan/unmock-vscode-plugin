@@ -1,15 +1,16 @@
 {
-	"rules": {
-		"no-string-throw": true,
-		"no-unused-expression": true,
-		"no-duplicate-variable": true,
-		"curly": true,
-		"class-name": true,
-		"semicolon": [
-			true,
-			"always"
-		],
-		"triple-equals": true
-	},
-	"defaultSeverity": "warning"
+  "defaultSeverity": "warning",
+  "extends": ["tslint:latest", "tslint-config-prettier"],
+  "rules": {
+    "ordered-imports": false,
+    "interface-name": [true, "never-prefix"],
+    "no-implicit-dependencies": [true, "dev"],
+    "no-unused-expression": true,
+    "no-duplicate-variable": true,
+    "curly": true,
+    "triple-equals": true,
+    "max-classes-per-file": false,
+    "member-access": false,
+    "object-literal-sort-keys": false
+  }
 }

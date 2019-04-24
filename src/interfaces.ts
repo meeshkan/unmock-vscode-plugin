@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import { Snap } from "./providers/link-tests-mocks";
 
 export interface IInsertUnmockAction {
   lastImportLocation: vscode.Position;
@@ -15,4 +16,10 @@ export interface ITestSnap {
 
 export interface IMockLocation {
   currentPath: string;
+}
+
+export interface IBuildLinkTestMockHover {
+  relevantSnap: Snap;
+  testIndex: number;
+  range?: vscode.Range;
 }

@@ -21,7 +21,7 @@
     "onLanguage:javascript",
     "onLanguage:typescript"
   ],
-  "main": "./dist/index.js",
+  "main": "./dist/index",
   "contributes": {
     "configuration": [
       {

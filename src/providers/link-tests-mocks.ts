@@ -8,9 +8,10 @@ import {
   removeStringsFromSourceText,
   countInString,
   findPositionInRanges,
+  dynamicRequire,
 } from "../utils";
 import { ITestSnap, IBuildLinkTestMockHover } from "../interfaces";
-import { mockExplorer } from "../index";
+import { mockExplorer } from "../explorer";
 
 const SNAPSHOT_SUFFIX = ".snap";
 // These must be found in a snapshot to be considered valid
@@ -69,7 +70,7 @@ export class Snap {
   private snapContents: { [key: string]: ITestSnap };
 
   constructor(snapFile: string) {
-    this.snapContents = require(snapFile); // Load contents from snap file
+    this.snapContents = dynamicRequire(snapFile); // Load contents from snap file
     // Get test names listed in this snap file
     // 1. Get keys from the loaded snap object
     // 2. Remove the last word from each key (assumed to be a number)

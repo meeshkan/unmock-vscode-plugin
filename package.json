@@ -1,98 +1,98 @@
 {
-	"name": "unmock",
-	"publisher": "Unmock",
-	"displayName": "unmock-vs",
-	"description": "Unmock plugin for VSCode",
-	"license": "MIT",
-	"icon": "resources/unmock-extension-logo.png",
-	"version": "0.0.0",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/unmock/unmock-vscode-plugin"
-	},
-	"engines": {
-		"vscode": "^1.32.0"
-	},
-	"categories": [
-		"Other"
-	],
-	"activationEvents": [
-		"workspaceContains:**/*.json",
-		"onLanguage:javascript",
-		"onLanguage:typescript"
-	],
-	"main": "./out/index.js",
-	"contributes": {
-		"configuration": [
-			{
-				"title": "Unmock",
-				"type": "object",
-				"properties": {
-					"unmock.refreshToken": {
-						"type": [
-							"string",
-							"null"
-						],
-						"default": null,
-						"description": "The refresh token to get when you registered for unmock. Used for various operations with the remote unmock service."
-					},
-					"unmock.path": {
-						"type": "string",
-						"default": ".unmock",
-						"description": "Default path to look for stored credentials (relative to the workspace or absolute path)."
-					},
-					"unmock.codeLens": {
-						"type": "boolean",
-						"default": false,
-						"description": "Use CodeLens to suggest places to use unmock; we will only present a single CodeLens suggestions to keep your vertical space tidy."
-					},
-					"unmock.lightbulb": {
-						"type": "boolean",
-						"default": false,
-						"description": "Use the light bulb to suggest places to use unmock when editing relevant lines."
-					}
-				}
-			}
-		],
-		"commands": [],
-		"viewsContainers": {
-			"activitybar": [
-				{
-					"id": "unmock-activity-button",
-					"title": "Unmock",
-					"icon": "./resources/unmock-logo.bmp"
-				}
-			]
-		},
-		"views": {
-			"unmock-activity-button": [
-				{
-					"id": "unmock.mocksExplorer",
-					"name": "Mock Explorer"
-				}
-			]
-		}
-	},
-	"scripts": {
-		"vscode:prepublish": "yarn run compile",
-		"compile": "tsc -p ./",
-		"watch": "tsc -watch -p ./",
-		"postinstall": "node ./node_modules/vscode/bin/install",
-		"test": "yarn run compile && node ./node_modules/vscode/bin/test"
-	},
-	"dependencies": {
-		"@types/ini": "^1.3.30",
-		"@types/lodash": "^4.14.123",
-		"axios": "^0.18.0",
-		"ini": "^1.3.5",
-		"lodash": "^4.17.11"
-	},
-	"devDependencies": {
-		"@types/mocha": "^2.2.42",
-		"@types/node": "^10.12.21",
-		"tslint": "^5.16.0",
-		"tslint-config-prettier": "^1.18.0",
-		"typescript": "^3.3.1",
-		"vscode": "^1.1.28"
-	}
+  "name": "unmock",
+  "publisher": "Unmock",
+  "displayName": "unmock-vs",
+  "description": "Unmock plugin for VSCode",
+  "license": "MIT",
+  "icon": "resources/unmock-extension-logo.png",
+  "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/unmock/unmock-vscode-plugin"
+  },
+  "engines": {
+    "vscode": "^1.32.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "workspaceContains:**/*.json",
+    "onLanguage:javascript",
+    "onLanguage:typescript"
+  ],
+  "main": "./out/index.js",
+  "contributes": {
+    "configuration": [
+      {
+        "title": "Unmock",
+        "type": "object",
+        "properties": {
+          "unmock.refreshToken": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "default": null,
+            "description": "The refresh token to get when you registered for unmock. Used for various operations with the remote unmock service."
+          },
+          "unmock.path": {
+            "type": "string",
+            "default": ".unmock",
+            "description": "Default path to look for stored credentials (relative to the workspace or absolute path)."
+          },
+          "unmock.codeLens": {
+            "type": "boolean",
+            "default": false,
+            "description": "Use CodeLens to suggest places to use unmock; we will only present a single CodeLens suggestions to keep your vertical space tidy."
+          },
+          "unmock.lightbulb": {
+            "type": "boolean",
+            "default": false,
+            "description": "Use the light bulb to suggest places to use unmock when editing relevant lines."
+          }
+        }
+      }
+    ],
+    "commands": [],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "unmock-activity-button",
+          "title": "Unmock",
+          "icon": "./resources/unmock-logo.bmp"
+        }
+      ]
+    },
+    "views": {
+      "unmock-activity-button": [
+        {
+          "id": "unmock.mocksExplorer",
+          "name": "Mock Explorer"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "yarn run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "postinstall": "node ./node_modules/vscode/bin/install",
+    "test": "yarn run compile && node ./node_modules/vscode/bin/test"
+  },
+  "dependencies": {
+    "@types/ini": "^1.3.30",
+    "@types/lodash": "^4.14.123",
+    "axios": "^0.18.0",
+    "ini": "^1.3.5",
+    "lodash": "^4.17.11"
+  },
+  "devDependencies": {
+    "@types/mocha": "^2.2.42",
+    "@types/node": "^10.12.21",
+    "tslint": "^5.16.0",
+    "tslint-config-prettier": "^1.18.0",
+    "typescript": "^3.3.1",
+    "vscode": "^1.1.28"
+  }
 }

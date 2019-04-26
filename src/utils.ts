@@ -55,7 +55,11 @@ const JS_SUFFIXES = "{js,ts,tsx,jsx}"; // es,es6,ts.erb?
 export const TestJSFilter: vscode.DocumentFilter = { scheme: "file", pattern: `**/*.test.*${JS_SUFFIXES}` }; // containing ".test." in filename
 export const TestJSFolderFilter: vscode.DocumentFilter = { scheme: "file", pattern: `**/test/*.${JS_SUFFIXES}` }; // under "test" folder
 export const TestsJSFolderFilter: vscode.DocumentFilter = { scheme: "file", pattern: `**/tests/*.${JS_SUFFIXES}` }; // under "tests" folder
-export const AllJSFileFilters = [TestJSFilter, TestJSFolderFilter, TestsJSFolderFilter];
+export const UnderscoreTestsJSFolderFilter: vscode.DocumentFilter = {
+  scheme: "file",
+  pattern: `**/__tests__/*.${JS_SUFFIXES}`,
+}; // under "tests" folder
+export const AllJSFileFilters = [TestJSFilter, TestJSFolderFilter, TestsJSFolderFilter, UnderscoreTestsJSFolderFilter];
 
 export function removeJSCommentsFromSourceText(srcText: string): string {
   // Replaces comments with newlines to maintain line count.

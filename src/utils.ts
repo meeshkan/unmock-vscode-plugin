@@ -22,20 +22,22 @@ export async function getAccessToken() {
     return;
   }
   try {
-    const { data: { accessToken } } = await axios.post("https://api.unmock.io:443/token/access", {refreshToken});
+    const {
+      data: { accessToken },
+    } = await axios.post("https://api.unmock.io:443/token/access", { refreshToken });
     return accessToken;
   } catch {
-    return;  // How do we want to handle errors here?
+    return; // How do we want to handle errors here?
   }
 }
 
-export function verifyFileHasBodyJson(filepath: string) {
-  // Returns file contents if it is a valid json for a body response
-  // Returns undefined otherwise
-  const fileContents = fs.readFileSync(filepath, 'utf-8');
+export function getJsonFileBody(filepath: string) {
+  // Returns "body" contents of valid JSON file;
+  // Returns undefined if file is not valid JSON or body does not exist
+  const fileContents = fs.readFileSync(filepath, "utf-8");
   try {
     const parsedContent = JSON.parse(fileContents);
-    return parsedContent["body"];
+    return parsedContent.body;
   } catch {
     return;
   }
@@ -50,14 +52,14 @@ function getRefreshToken(): string | undefined {
 }
 
 const JS_SUFFIXES = "{js,ts,tsx,jsx}"; // es,es6,ts.erb?
-export const TestJSFilter: vscode.DocumentFilter = {scheme: "file", pattern: `**/*.test.*${JS_SUFFIXES}`}; // containing ".test." in filename
-export const TestJSFolderFilter: vscode.DocumentFilter = {scheme: "file", pattern: `**/test/*.${JS_SUFFIXES}`}; // under "test" folder
-export const TestsJSFolderFilter: vscode.DocumentFilter = {scheme: "file", pattern: `**/tests/*.${JS_SUFFIXES}`}; // under "tests" folder
+export const TestJSFilter: vscode.DocumentFilter = { scheme: "file", pattern: `**/*.test.*${JS_SUFFIXES}` }; // containing ".test." in filename
+export const TestJSFolderFilter: vscode.DocumentFilter = { scheme: "file", pattern: `**/test/*.${JS_SUFFIXES}` }; // under "test" folder
+export const TestsJSFolderFilter: vscode.DocumentFilter = { scheme: "file", pattern: `**/tests/*.${JS_SUFFIXES}` }; // under "tests" folder
 export const AllJSFileFilters = [TestJSFilter, TestJSFolderFilter, TestsJSFolderFilter];
 
 export function removeJSCommentsFromSourceText(srcText: string): string {
   // Replaces comments with newlines to maintain line count.
-  return srcText.replace(/\/\*[\s\S]*?\*\/|([^\\:]|^)\/\/.*$/gm, (match) => {
+  return srcText.replace(/\/\*[\s\S]*?\*\/|([^\\:]|^)\/\/.*$/gm, match => {
     return "\n".repeat(countInString(match, "\n"));
   });
 }
@@ -70,25 +72,29 @@ export function removeStringsFromSourceText(srcText: string): string {
   return srcText.replace(/(?:"[^"]*?"|'[^']*?'|`[^`]*?`)/gm, "");
 }
 
-export function getRangeFromTextAndMatch(srcText: string, searchFor: RegExpMatchArray | string[], entireLine: boolean = true): vscode.Range[] {
+export function getRangeFromTextAndMatch(
+  srcText: string,
+  searchFor: RegExpMatchArray | string[],
+  entireLine: boolean = true
+): vscode.Range[] {
   /**
    * Constructs a `vscode.Range` object for each element in `searchFor` that's found in `srcText`.
-   * 
+   *
    * Assumptions:
    *  - Every element in `searchFor` is indeed in `srcText`
-   * 
+   *
    * @param srcText - Raw source text, unsplitted (contains `\n`)
    * @param searchFor - List of strings (or a `RegExpMatchArray`) to search in `srcText` and build a Range object for
    * @param entireLine - Whether or not the returned Range objects will cover the entire line (ignoring indentation)
    *    or just encapsulate the matched string.
-   * 
+   *
    * @returns An array of `vscode.Range` objects, where each Range object describes the location
    *  (line, start location, end location) of a matching element in `searchFor` in `srcText`.
    */
   let lastPosition = 0;
   const splittedSrcText = srcText.split("\n");
 
-  return searchFor.map((str) => {
+  return searchFor.map(str => {
     const pos = srcText.indexOf(str, lastPosition);
     lastPosition += pos;
     // -1 for zero-based

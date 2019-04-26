@@ -2,29 +2,33 @@ import * as vscode from "vscode";
 import * as fs from "fs";
 import * as path from "path";
 import axios from "axios";
-import { getAccessToken, verifyFileHasBodyJson } from "./utils";
+import { getAccessToken, getJsonFileBody } from "./utils";
 
-const UNMOCK_METADATA_FILENAME = "metadata.unmock.yml";
-const UNMOCK_METADATA_SUFFIX = "unmock.yml";
+// Filenames are hardcoded for the schema.
+const UNMOCK_METADATA_FILENAME = "meta.json"; // readonly
+const UNMOCK_REQUEST_FILENAME = "request.json"; // readonly
+const UNMOCK_RESPONSE_FILENAME = "response.json"; // read-write
+const GLOB_PATTERN = `**/${UNMOCK_RESPONSE_FILENAME}`;
+
+const isJsonFile = (fp?: string, directoryOK = false) => {
+  if (fp === undefined) {
+    return false;
+  }
+  const fileStats = fs.statSync(fp);
+  return (fileStats.isFile() && fp.endsWith(".json")) || (directoryOK && fileStats.isDirectory());
+};
+
+const trimToFolderOrFileBeneath = (filepath: string, rootDir?: string) => {
+  /**
+   * Returns the label as the file or foldername immediately after given rootDir
+   * rootDir is expected to be an absolute path.
+   */
+  const noRoot = rootDir ? filepath.replace(rootDir, "") : filepath;
+  const splittedPath = noRoot.split("/");
+  return splittedPath[1]; // 1 because the trailing '/' remains after replace
+};
 
 export class MockExplorer implements vscode.TreeDataProvider<MockTreeItem> {
-  private static isJsonFile(fp?: string, directoryOK = false) {
-    if (fp === undefined) {
-      return false;
-    }
-    const fileStats = fs.statSync(fp);
-    return (fileStats.isFile() && fp.endsWith(".json")) || (directoryOK && fileStats.isDirectory());
-  }
-
-  private static trimToFolderOrFileBeneath(filepath: string, rootDir?: string) {
-    /**
-     * Returns the label as the file or foldername immediately after given rootDir
-     * rootDir is expected to be an absolute path.
-     */
-    const noRoot = rootDir ? filepath.replace(rootDir, "") : filepath;
-    const splittedPath = noRoot.split("/");
-    return splittedPath[1]; // 1 because the trailing '/' remains after replace
-  }
   private _onDidChangeTreeData = new vscode.EventEmitter<MockTreeItem>();
   private _tree: MockTreeItem[] = [];
   private watcher: vscode.FileSystemWatcher | undefined;
@@ -34,17 +38,17 @@ export class MockExplorer implements vscode.TreeDataProvider<MockTreeItem> {
   onDidChangeTreeData = this._onDidChangeTreeData.event;
 
   constructor() {
-    this.mockRelativePattern = `**/*.{json,${UNMOCK_METADATA_SUFFIX}}`;
+    this.mockRelativePattern = GLOB_PATTERN;
     const rootPath = vscode.workspace.rootPath;
     if (rootPath !== undefined) {
       this.mockPath = rootPath;
-      this.mockRelativePattern = new vscode.RelativePattern(this.mockPath, `**/*.{json,${UNMOCK_METADATA_SUFFIX}}`);
+      this.mockRelativePattern = new vscode.RelativePattern(this.mockPath, GLOB_PATTERN);
       this.hardRefresh();
 
       this.watcher = vscode.workspace.createFileSystemWatcher(this.mockRelativePattern);
       this.watcher.onDidChange(async fileUri => {
         // See if the JSON is valid - otherwise don't every bother
-        const fileContents = verifyFileHasBodyJson(fileUri.fsPath);
+        const fileContents = getJsonFileBody(fileUri.fsPath);
         if (fileContents === undefined) {
           return;
         }
@@ -85,7 +89,6 @@ export class MockExplorer implements vscode.TreeDataProvider<MockTreeItem> {
       ...element,
       command: element.isFile
         ? {
-            // TODO: Update this to JSON editor that POSTS to cloud if token is given
             command: "unmock.editMock",
             arguments: [element],
             title: "Opens mock for editing",
@@ -115,20 +118,30 @@ export class MockExplorer implements vscode.TreeDataProvider<MockTreeItem> {
   private hardRefresh() {
     this.locationOfMocks = []; // Clear known mocks location
     vscode.workspace.findFiles(this.mockRelativePattern).then(filepaths => {
-      filepaths.forEach(fp => {
-        // Check if a metadata file exists in the same location
-        const basename = path.basename(fp.fsPath);
-        if (basename !== UNMOCK_METADATA_FILENAME) {
-          const metadataFile = fp.fsPath.replace(basename, `${UNMOCK_METADATA_FILENAME}`);
-          // Filter by matching filepaths
-          if (filepaths.reduce((acc, fileUri) => acc || fileUri.fsPath === metadataFile, false)) {
-            this.locationOfMocks.push(fp.fsPath);
+      filepaths.forEach((fp, index) => {
+        // Async check if a metadata and request files exists in the same location
+        // only if both exists then we can know for sure a response file is unmock'd;
+        const maybeUnmockDir = path.dirname(fp.fsPath);
+        const metaFile = path.join(maybeUnmockDir, UNMOCK_METADATA_FILENAME);
+        fs.exists(metaFile, metaExists => {
+          if (!metaExists) {
+            return;
           }
-        }
+          const requestFile = path.join(maybeUnmockDir, UNMOCK_REQUEST_FILENAME);
+          fs.exists(requestFile, requestExists => {
+            if (!requestExists) {
+              return;
+            }
+            this.locationOfMocks.push(fp.fsPath);
+            if (index === filepaths.length - 1) {
+              // Last file! fire change.
+              const rootPath = vscode.workspace.rootPath;
+              this._tree = rootPath === undefined ? [] : this.populateChildren(this.mockPath);
+              this._onDidChangeTreeData.fire();
+            }
+          });
+        });
       });
-      const rootPath = vscode.workspace.rootPath;
-      this._tree = rootPath === undefined ? [] : this.populateChildren(this.mockPath);
-      this._onDidChangeTreeData.fire();
     });
   }
 
@@ -138,7 +151,7 @@ export class MockExplorer implements vscode.TreeDataProvider<MockTreeItem> {
     }
     const files = this.getJsons(rootDir);
     const children = files.map(f => {
-      const label = MockExplorer.trimToFolderOrFileBeneath(f, rootDir);
+      const label = trimToFolderOrFileBeneath(f, rootDir);
       const isFile = fs.statSync(f).isFile();
       const ti = new MockTreeItem(
         label,
@@ -177,7 +190,7 @@ export class MockExplorer implements vscode.TreeDataProvider<MockTreeItem> {
         if (this.directoryIsKnownToContainMock(fp) === false) {
           return false;
         }
-        return MockExplorer.isJsonFile(fp, true);
+        return isJsonFile(fp, true);
       });
   }
 

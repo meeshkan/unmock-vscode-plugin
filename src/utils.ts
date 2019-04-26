@@ -2,6 +2,9 @@ import axios from "axios";
 import * as vscode from "vscode";
 import * as fs from "fs";
 
+// @ts-ignore
+export const dynamicRequire = typeof __webpack_require__ === "function" ? __non_webpack_require__ : require;
+
 export function getImportStatement(lang: string): string | undefined {
   lang = lang.toLowerCase();
   if (lang === "typescript" || lang === "javascript") {

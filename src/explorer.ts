@@ -217,3 +217,5 @@ export class MockTreeItem extends vscode.TreeItem {
     super(label, collapsibleState);
   }
 }
+
+export const mockExplorer = new MockExplorer();

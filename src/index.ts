@@ -3,9 +3,9 @@ import * as fs from "fs";
 import * as path from "path";
 import * as ini from "ini";
 import * as os from "os";
-import { debounce } from "debounce";
+// import { debounce } from "debounce";
 import { IMockLocation } from "./interfaces";
-import { MockExplorer } from "./explorer";
+import { mockExplorer } from "./explorer";
 import {
   TypescriptInsertUnmockCodeLens,
   TypeScriptInsertUnmockAction,
@@ -38,8 +38,6 @@ const updateRefreshToken = (config: vscode.WorkspaceConfiguration) => {
   // save refresh token in configuration in workspace
   config.update("refreshToken", refreshToken, false);
 };
-
-export let mockExplorer: undefined | MockExplorer;
 
 const disposables: vscode.Disposable[] = [];
 
@@ -114,7 +112,6 @@ export function activate(context: vscode.ExtensionContext) {
   disposables.push(vscode.languages.registerCodeLensProvider(AllJSFileFilters, new LinkMockCodeLens(snapCollection)));
 
   // Add the extension button
-  mockExplorer = new MockExplorer(); // todo - cleanup?
   disposables.push(vscode.window.registerTreeDataProvider("unmock.mocksExplorer", mockExplorer));
 
   // Add individual commands

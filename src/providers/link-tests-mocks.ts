@@ -66,9 +66,9 @@ export class SnapCollection {
 
 export class Snap {
   public tests: string[];
-  private snapContents: any;
+  private snapContents: { [key: string]: ITestSnap };
 
-  constructor(private snapFile: string) {
+  constructor(snapFile: string) {
     this.snapContents = require(snapFile); // Load contents from snap file
     // Get test names listed in this snap file
     // 1. Get keys from the loaded snap object
@@ -84,20 +84,19 @@ export class Snap {
     );
   }
 
-  public loadTest({ idx, name }: { idx?: number; name?: string }) {
+  public loadTest({ idx, name }: { idx?: number; name?: string }): ITestSnap[] {
     let testName: string;
     if (name === undefined) {
       if (idx === undefined || idx < 0 || idx >= this.tests.length) {
         throw Error("Invalid index for test snapshot.");
       }
-
       testName = this.tests[idx];
     } else {
       testName = name;
     }
     return Object.keys(this.snapContents)
-      .filter(key => key.startsWith(testName))
-      .map(key => JSON.parse(this.snapContents[key]));
+      .filter(k => k.startsWith(testName))
+      .map(k => this.snapContents[k]);
   }
 }
 
@@ -175,15 +174,13 @@ function buildLinkTestsMocksHover(...args: IBuildLinkTestMockHover[]) {
       return; // Can't verify mocks actually exist
     }
     const mockLocation = mockExplorer.getPathFromHash(snp.hash);
-    if (mockLocation === undefined) {
-      return; // Filter mocks that aren't found in the explorer
-    }
     const cmdUri = vscode.Uri.parse(
       `command:unmock.editMock?${encodeURIComponent(JSON.stringify({ currentPath: mockLocation }))}`
     );
     const md =
-      `[\`${snp.hash}\`](${cmdUri}): _${snp.method.toUpperCase()}_ ` +
-      `[${(snp.host + snp.path).substr(0, 24) + "..."}]()  \n`;
+      `${
+        mockLocation !== undefined ? `[\`${snp.hash}\`](${cmdUri})` : `\`${snp.hash}\``
+      }: _${snp.method.toUpperCase()}_ ` + `[${(snp.host + snp.path).substr(0, 24) + "..."}]()  \n`;
     content.appendMarkdown(md);
   });
   content.isTrusted = true;

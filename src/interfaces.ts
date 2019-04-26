@@ -8,6 +8,7 @@ export interface IInsertUnmockAction {
 }
 
 export interface ITestSnap {
+  [key: string]: string;
   hash: string;
   host: string;
   method: string;

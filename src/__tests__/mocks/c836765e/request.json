@@ -1,0 +1,10 @@
+{
+  "headers": {
+    "accept": "application/json, text/plain, */*",
+    "user-agent": "axios/0.18.0",
+    "connection": "close"
+  },
+  "host": "www.example.com",
+  "method": "GET",
+  "path": "/"
+}

@@ -1,0 +1,22 @@
+{
+  "headers": {
+    "content-length": "27",
+    "content-type": "application/json; charset=utf-8",
+    "etag": "W/\"1b-7g5ixEhaaWamNbXC41kze6IHSf4\"",
+    "access-control-allow-origin": "*",
+    "x-dns-prefetch-control": "off",
+    "x-frame-options": "SAMEORIGIN",
+    "strict-transport-security": "max-age=15552000; includeSubDomains",
+    "x-download-options": "noopen",
+    "x-content-type-options": "nosniff",
+    "x-xss-protection": "1; mode=block",
+    "unmock-hash": "d01d13fe",
+    "access-control-expose-headers": "Content-Type, unmock-hash",
+    "set-cookie": [
+      "ARRAffinity=c1d9bd0cf801a67b8bc07791d977360cff09284d48d9e6baf09ab1b2c798438c;Path=/;HttpOnly;Domain=api.unmock.io"
+    ],
+    "date": "Tue, 16 Apr 2019 13:06:52 GMT",
+    "connection": "close"
+  },
+  "body": "{\"isNew\":false,\"vid\":12132}"
+}

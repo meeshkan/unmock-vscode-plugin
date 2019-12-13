@@ -1,5 +1,7 @@
 # Unmock Visual Studio Code Plugin
 
+:warning: **This plugin is using an outdated version of Unmock.** If you'd be interested in helping us update this, please check out this [open issue](https://github.com/unmock/unmock-vscode-plugin/issues/27).
+
 Unmock Visual Studio Code plugin - synchronizing seamlessly with all your unmock needs!
 
 ## Development

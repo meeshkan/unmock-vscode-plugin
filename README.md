@@ -1,6 +1,6 @@
 # Unmock Visual Studio Code Plugin
 
-:warning: **This plugin is using an outdated version of Unmock.** If you'd be interested in helping us update this, please check out this [open issue](https://github.com/unmock/unmock-vscode-plugin/issues/27).
+:warning: **This plugin is using an outdated version of Unmock.** If you'd be interested in helping us update this, please check out this [open issue](https://github.com/meeshkan/unmock-vscode-plugin/issues/27).
 
 Unmock Visual Studio Code plugin - synchronizing seamlessly with all your unmock needs!
 
@@ -47,6 +47,6 @@ Initial release, limited functionality.
 ## Contributing
 
 Thanks for wanting to contribute! We will soon have a contributing page
-detaling how to contribute. Meanwhile, there are plenty of features that haven't been implemented yet. Please check out our [open issues](https://github.com/unmock/unmock-vscode-plugin/issues). We'd really appreciate your help!
+detaling how to contribute. Meanwhile, there are plenty of features that haven't been implemented yet. Please check out our [open issues](https://github.com/meeshkan/unmock-vscode-plugin/issues). We'd really appreciate your help!
 
-Please note that this project is governed by the [Unmock Community Code of Conduct](https://github.com/unmock/code-of-conduct). By participating in this project, you agree to abide by its terms.
+Please note that this project is governed by the [Meeshkan Community Code of Conduct](https://github.com/meeshkan/code-of-conduct). By participating in this project, you agree to abide by its terms.
